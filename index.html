@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAMU-192 Emergency Response Dashboard</title>
+  
+  <!-- Importando o React e o ReactDOM diretamente da internet (CDN) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Importando o Babel (ele converte o código moderno do React para o navegador entender em tempo real) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Fonte elegante do Google (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #F7F8FA;
+    }
+  </style>
+</head>
+<body>
+  <!-- É aqui dentro que o React vai desenhar o seu dashboard -->
+  <div id="root"></div>
+
+  <!-- O type="text/babel" diz ao navegador para usar o Babel antes de executar o script -->
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const dados = [
+      { chamados: 1106, am: "1063-8",              tipo: "SBV-E", supervisao: "TIRADENTES" },
+      { chamados: 878,  am: "1064-9",              tipo: "SBV",   supervisao: "TIRADENTES" },
+      { chamados: 1034, am: "1075-0",              tipo: "SBV",   supervisao: "S.MATEUS"   },
+      { chamados: 1035, am: "1076-1",              tipo: "SBV",   supervisao: "S.MATEUS"   },
+      { chamados: 1054, am: "1087-2",              tipo: "SBV",   supervisao: "ERMELINO"   },
+      { chamados: 1067, am: "1088-3",              tipo: "SBV",   supervisao: "ITAQUERA"   },
+      { chamados: 861,  am: "1089-4",              tipo: "SBV",   supervisao: "TIRADENTES" },
+      { chamados: 1008, am: "1090-5",              tipo: "SBV-E", supervisao: "ITAIM"      },
+      { chamados: 1114, am: "1091-6",              tipo: "SBV-E", supervisao: "ITAIM"      },
+      { chamados: 1025, am: "1107-2",              tipo: "SBV",   supervisao: "ITAQUERA"   },
+      { chamados: 916,  am: "1108-3",              tipo: "SBV-E", supervisao: "TIRADENTES" },
+      { chamados: 1096, am: "1109-4",              tipo: "SBV",   supervisao: "S.MATEUS"   },
+      { chamados: 854,  am: "1151-9",              tipo: "SAV",   supervisao: "ITAQUERA"   },
+      { chamados: 1129, am: "1152-7",              tipo: "SBV-E", supervisao: "ITAQUERA"   },
+      { chamados: 974,  am: "1153-5",              tipo: "SBV",   supervisao: "ITAIM"      },
+      { chamados: 995,  am: "1154-3",              tipo: "SBV",   supervisao: "ERMELINO"   },
+      { chamados: 709,  am: "1155-1",              tipo: "SAV",   supervisao: "ITAIM"      },
+      { chamados: 997,  am: "1156-0",              tipo: "SBV",   supervisao: "TIRADENTES" },
+      { chamados: 1097, am: "1157-8",              tipo: "SBV",   supervisao: "S.MATEUS"   },
+      { chamados: 1214, am: "1158-2",              tipo: "SBV",   supervisao: "ITAIM"      },
+      { chamados: 762,  am: "1188-8",              tipo: "SBV",   supervisao: "ERMELINO"   },
+      { chamados: 865,  am: "1191-8",              tipo: "SBV-E", supervisao: "S.MATEUS"   },
+      { chamados: 802,  am: "1192-6",              tipo: "SBV",   supervisao: "ERMELINO"   },
+      { chamados: 1023, am: "1193-4",              tipo: "SBV",   supervisao: "ITAIM"      },
+      { chamados: 736,  am: "1199-3",              tipo: "SBV",   supervisao: "ERMELINO"   },
+      { chamados: 972,  am: "1200-0",              tipo: "SBV",   supervisao: "ITAQUERA"   },
+      { chamados: 576,  am: "OD11",                tipo: "OD",    supervisao: "TIRADENTES" },
+      { chamados: 421,  am: "URAM J. TUPI",        tipo: "URAM",  supervisao: "ITAIM"      },
+      { chamados: 224,  am: "URAM JD HELENA",      tipo: "URAM",  supervisao: "ITAIM"      },
+      { chamados: 251,  am: "URAM PB S. MIGUEL",   tipo: "URAM",  supervisao: "ITAIM"      },
+      { chamados: 341,  am: "URAMS H. TIRADENTES", tipo: "URAM",  supervisao: "TIRADENTES" },
+      { chamados: 469,  am: "URAMS ITAQUERA",      tipo: "URAM",  supervisao: "ITAQUERA"   },
+      { chamados: 361,  am: "URAMS RIO CLARO",     tipo: "URAM",  supervisao: "S.MATEUS"   },
+      { chamados: 216,  am: "URAMS S. MATEUS",     tipo: "URAM",  supervisao: "S.MATEUS"   },
+      { chamados: 496,  am: "URAMS USP Leste",     tipo: "URAM",  supervisao: "ERMELINO"   },
+    ];
+
+    const TIPO_COLORS = {
+      "SBV":      { bg: "#E8F5E9", text: "#2E7D32", border: "#A5D6A7" },
+      "SBV-E":    { bg: "#E3F2FD", text: "#1565C0", border: "#90CAF9" },
+      "SAV":      { bg: "#FFF3E0", text: "#E65100", border: "#FFCC80" },
+      "OD":       { bg: "#F3E5F5", text: "#6A1B9A", border: "#CE93D8" },
+      "URAM":     { bg: "#FCE4EC", text: "#880E4F", border: "#F48FB1" },
+      "DELEGADA": { bg: "#FFFDE7", text: "#F57F17", border: "#FFF176" },
+    };
+
+    const SUP_COLORS = {
+      "ITAQUERA":   "#1565C0",
+      "TIRADENTES": "#6A1B9A",
+      "ITAIM":      "#2E7D32",
+      "S.MATEUS":   "#E65100",
+      "ERMELINO":   "#880E4F",
+      "ITQUERA":    "#1565C0",
+    };
+
+    function Badge({ tipo }) {
+      const c = TIPO_COLORS[tipo] || { bg: "#F5F5F5", text: "#555", border: "#CCC" };
+      return (
+        <span style={{
+          background: c.bg, color: c.text, border: `1px solid ${c.border}`,
+          borderRadius: 5, padding: "2px 9px", fontSize: 12, fontWeight: 700,
+          letterSpacing: 0.5, whiteSpace: "nowrap"
+        }}>{tipo}</span>
+      );
+    }
+
+    function SupervisaoDot({ sup }) {
+      const color = SUP_COLORS[sup] || "#999";
+      return (
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0, display: "inline-block" }} />
+          <span style={{ fontWeight: 600, fontSize: 13, color: "#333" }}>{sup}</span>
+        </span>
+      );
+    }
+
+    function MiniBar({ value, max, color }) {
+      return (
+        <div style={{ background: "#F0F0F0", borderRadius: 4, height: 7, width: "100%", overflow: "hidden" }}>
+          <div style={{ width: `${(value / max) * 100}%`, background: color, height: "100%", borderRadius: 4, transition: "width .4s" }} />
+        </div>
+      );
+    }
+
+    function Dashboard() {
+      const [filtroSup, setFiltroSup] = useState("TODOS");
+      const [filtroTipo, setFiltroTipo] = useState("TODOS");
+      const [busca, setBusca] = useState("");
+      const [ordenar, setOrdenar] = useState("chamados_desc");
+
+      const supervisoes = ["TODOS", ...Array.from(new Set(dados.map(d => d.supervisao))).sort()];
+      const tipos = ["TODOS", ...Array.from(new Set(dados.map(d => d.tipo))).sort()];
+      const totalGeral = dados.reduce((s, d) => s + d.chamados, 0);
+
+      const filtrados = useMemo(() => {
+        let r = dados.filter(d => {
+          const supOk = filtroSup === "TODOS" || d.supervisao === filtroSup;
+          const tipoOk = filtroTipo === "TODOS" || d.tipo === filtroTipo;
+          const buscaOk = busca === "" ||
+            d.am.toLowerCase().includes(busca.toLowerCase()) ||
+            String(d.chamados).includes(busca) ||
+            d.supervisao.toLowerCase().includes(busca.toLowerCase());
+          return supOk && tipoOk && buscaOk;
+        });
+        const [campo, dir] = ordenar.split("_");
+        r = [...r].sort((a, b) => dir === "desc" ? b[campo] - a[campo] : a[campo] - b[campo]);
+        return r;
+      }, [filtroSup, filtroTipo, busca, ordenar]);
+
+      const totalFiltrado = filtrados.reduce((s, d) => s + d.chamados, 0);
+      const maxChamados = Math.max(...dados.map(d => d.chamados));
+
+      // Estatísticas por supervisão
+      const porSup = useMemo(() => {
+        const map = {};
+        dados.forEach(d => {
+          if (!map[d.supervisao]) map[d.supervisao] = 0;
+          map[d.supervisao] += d.chamados;
+        });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, []);
+
+      const maxSup = Math.max(...porSup.map(([, v]) => v));
+
+      // Estatísticas por tipo
+      const porTipo = useMemo(() => {
+        const map = {};
+        dados.forEach(d => {
+          if (!map[d.tipo]) map[d.tipo] = 0;
+          map[d.tipo] += d.chamados;
+        });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, []);
+
+      const styles = {
+        root: { fontFamily: "'Inter', 'Segoe UI', sans-serif", background: "#F7F8FA", minHeight: "100vh", padding: "0 0 40px 0" },
+        header: {
+          background: "linear-gradient(135deg, #0D1B2A 0%, #1B3A6B 100%)",
+          color: "#fff", padding: "28px 32px 20px", marginBottom: 0,
+        },
+        headerTitle: { fontSize: 22, fontWeight: 800, letterSpacing: 1, margin: 0, color: "#fff" },
+        headerSub: { fontSize: 13, color: "#90CAF9", marginTop: 4 },
+        kpiRow: { display: "flex", gap: 16, padding: "20px 28px", flexWrap: "wrap" },
+        kpi: {
+          background: "#fff", borderRadius: 12, padding: "16px 22px",
+          flex: "1 1 140px", boxShadow: "0 1px 4px rgba(0,0,0,.08)",
+          borderTop: "3px solid"
+        },
+        kpiVal: { fontSize: 28, fontWeight: 800, lineHeight: 1 },
+        kpiLabel: { fontSize: 12, color: "#888", marginTop: 4, fontWeight: 500 },
+        body: { display: "flex", gap: 18, padding: "0 28px", flexWrap: "wrap" },
+        sidebar: { flex: "0 0 220px", display: "flex", flexDirection: "column", gap: 16 },
+        card: { background: "#fff", borderRadius: 12, boxShadow: "0 1px 4px rgba(0,0,0,.07)", overflow: "hidden" },
+        cardTitle: { fontSize: 12, fontWeight: 700, color: "#555", padding: "13px 16px 8px", borderBottom: "1px solid #F0F0F0", letterSpacing: 1, textTransform: "uppercase" },
+        main: { flex: "1 1 500px" },
+        filters: { background: "#fff", borderRadius: 12, boxShadow: "0 1px 4px rgba(0,0,0,.07)", padding: "14px 16px", marginBottom: 14, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" },
+        input: { border: "1px solid #E0E0E0", borderRadius: 8, padding: "7px 12px", fontSize: 13, outline: "none", flex: "1 1 160px" },
+        select: { border: "1px solid #E0E0E0", borderRadius: 8, padding: "7px 12px", fontSize: 13, background: "#fff", cursor: "pointer", outline: "none" },
+        table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+        th: { background: "#F7F8FA", padding: "10px 14px", fontWeight: 700, color: "#444", textAlign: "left", fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", borderBottom: "2px solid #E8E8E8" },
+        td: { padding: "10px 14px", borderBottom: "1px solid #F2F2F2", color: "#333" },
+        trEven: { background: "#FAFBFC" },
+      };
+
+      return (
+        <div style={styles.root}>
+          <div style={styles.header}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <p style={styles.headerTitle}>🚑 SAMU-192 INTERLOCUÇÃO LESTE - INDICADORES DE ATENDIMENTO 2026</p>
+                <p style={styles.headerSub}>Distribuição por Ambulância · Tipo · Supervisão</p>
+              </div>
+              <div style={{ background: "rgba(255,255,255,.12)", borderRadius: 8, padding: "8px 16px", textAlign: "right" }}>
+                <div style={{ fontSize: 11, color: "#90CAF9" }}>TOTAL GERAL</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: "#fff" }}>{totalGeral.toLocaleString("pt-BR")}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* KPIs */}
+          <div style={styles.kpiRow}>
+            {[
+              { label: "Ambulâncias", val: dados.length, color: "#1565C0" },
+              { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "#6A1B9A" },
+              { label: "Tipos de Unidade de Atendimento", val: new Set(dados.map(d => d.tipo)).size, color: "#2E7D32" },
+              { label: "Maior volume", val: maxChamados.toLocaleString("pt-BR"), color: "#E65100" },
+              { label: "Média/UA", val: Math.round(totalGeral / dados.length), color: "#880E4F" },
+            ].map(k => (
+              <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }}>
+                <div style={{ ...styles.kpiVal, color: k.color }}>{k.val}</div>
+                <div style={styles.kpiLabel}>{k.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={styles.body}>
+            {/* Sidebar */}
+            <div style={styles.sidebar}>
+              {/* Por supervisão */}
+              <div style={styles.card}>
+                <div style={styles.cardTitle}>Por Supervisão</div>
+                <div style={{ padding: "10px 16px", display: "flex", flexDirection: "column", gap: 11 }}>
+                  {porSup.map(([sup, val]) => (
+                    <div key={sup}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: SUP_COLORS[sup] || "#555" }}>{sup}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#333" }}>{val.toLocaleString("pt-BR")}</span>
+                      </div>
+                      <MiniBar value={val} max={maxSup} color={SUP_COLORS[sup] || "#90A4AE"} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Por tipo */}
+              <div style={styles.card}>
+                <div style={styles.cardTitle}>Por Tipo</div>
+                <div style={{ padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {porTipo.map(([tipo, val]) => {
+                    const c = TIPO_COLORS[tipo] || {};
+                    return (
+                      <div key={tipo} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Badge tipo={tipo} />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#333" }}>{val.toLocaleString("pt-BR")}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Tabela principal */}
+            <div style={styles.main}>
+              <div style={styles.filters}>
+                <input
+                  style={styles.input}
+                  placeholder="🔍 Buscar AM, chamados ou supervisão..."
+                  value={busca}
+                  onChange={e => setBusca(e.target.value)}
+                />
+                <select style={styles.select} value={filtroSup} onChange={e => setFiltroSup(e.target.value)}>
+                  {supervisoes.map(s => <option key={s}>{s}</option>)}
+                </select>
+                <select style={styles.select} value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
+                  {tipos.map(t => <option key={t}>{t}</option>)}
+                </select>
+                <select style={styles.select} value={ordenar} onChange={e => setOrdenar(e.target.value)}>
+                  <option value="chamados_desc">↓ Chamados</option>
+                  <option value="chamados_asc">↑ Chamados</option>
+                </select>
+              </div>
+
+              <div style={styles.card}>
+                <div style={{ padding: "10px 16px 6px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #F0F0F0" }}>
+                  <span style={{ fontSize: 12, color: "#888" }}>
+                    <strong style={{ color: "#333" }}>{filtrados.length}</strong> ambulâncias ·{" "}
+                    <strong style={{ color: "#1565C0" }}>{totalFiltrado.toLocaleString("pt-BR")}</strong> chamados
+                  </span>
+                </div>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={styles.table}>
+                    <thead>
+                      <tr>
+                        {["AM", "Tipo", "Supervisão", "Chamados"].map(h => (
+                          <th key={h} style={styles.th}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtrados.map((d, i) => (
+                        <tr key={d.am} style={i % 2 === 1 ? styles.trEven : {}}>
+                          <td style={{ ...styles.td, fontWeight: 600 }}>{d.am}</td>
+                          <td style={styles.td}><Badge tipo={d.tipo} /></td>
+                          <td style={styles.td}><SupervisaoDot sup={d.supervisao} /></td>
+                          <td style={{ ...styles.td, fontWeight: 700, fontSize: 15, color: "#1B3A6B" }}>
+                            {d.chamados.toLocaleString("pt-BR")}
+                          </td>
+                        </tr>
+                      ))}
+                      {filtrados.length === 0 && (
+                        <tr><td colSpan={4} style={{ ...styles.td, textAlign: "center", color: "#aaa", padding: 32 }}>Nenhum resultado encontrado.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Renderizando o aplicativo na tela
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Dashboard />);
+  </script>
+</body>
+</html>
