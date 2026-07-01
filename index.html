@@ -271,11 +271,11 @@
           {/* KPIs */}
           <div style={styles.kpiRow}>
             {[
-              { label: "Ambulâncias", val: dados.length, color: "#1565C0" },
+              { label: "Unidades de Atendimento", val: dados.length, color: "#1565C0" },
               { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "#6A1B9A" },
               { label: "Tipos de Unidade de Atendimento", val: new Set(dados.map(d => d.tipo)).size, color: "#2E7D32" },
               { label: "Maior volume", val: maxChamados.toLocaleString("pt-BR"), color: "#E65100" },
-              { label: "Média/UA", val: dados.length > 0 ? Math.round(totalGeral / dados.length) : 0, color: "#880E4F" },
+              { label: "Média", val: dados.length > 0 ? Math.round(totalGeral / dados.length) : 0, color: "#880E4F" },
             ].map(k => (
               <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }}>
                 <div style={{ ...styles.kpiVal, color: k.color }}>{k.val}</div>
