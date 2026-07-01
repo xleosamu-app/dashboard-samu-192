@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- Cole esta linha logo abaixo da tag do Babel no seu <head> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SAMU-192 Emergency Response Dashboard</title>
@@ -13,6 +11,9 @@
   
   <!-- Importando o Babel (ele converte o código moderno do React para o navegador entender em tempo real) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Importando o PapaParse para ler a Planilha do Google -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
   <!-- Fonte elegante do Google (Inter) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,59 +34,10 @@
 
   <!-- O type="text/babel" diz ao navegador para usar o Babel antes de executar o script -->
   <script type="text/babel">
-    const { useState, userEffect, useMemo } = React;
-    // 1. Substitua esta linha antiga:
-// const { useState, useMemo } = React;
-// Por esta:
-const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo } = React;
 
-// 2. Cole aqui o link da planilha que você copiou no Passo 2:
-const LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?gid=0&single=true&output=csv";
-
-function App() {
-  const [dados, setDados] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(null);
-
-  // Efeito que busca os dados da planilha assim que a página carrega
-  useEffect(() => {
-    Papa.parse(LINK_PLANILHA, {
-      download: true,
-      header: true, // Usa a primeira linha como chave do objeto
-      dynamicTyping: true, // Converte números automaticamente
-      complete: (results) => {
-        // Remove linhas em branco que possam vir da planilha
-        const dadosValidos = results.data.filter(item => item.am && item.chamados);
-        setDados(dadosValidos);
-        setCarregando(false);
-      },
-      error: (err) => {
-        console.error("Erro ao carregar planilha:", err);
-        setErro("Não foi possível carregar os dados da planilha.");
-        setCarregando(false);
-      }
-    });
-  }, []);
-
-  // Adicione uma verificação visual de carregamento no início do retorno do componente
-  if (carregando) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
-        <h3>Carregando dados da planilha...</h3>
-      </div>
-    );
-  }
-
-  if (erro) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: 'red' }}>
-        <h3>{erro}</h3>
-      </div>
-    );
-  }
-
-  // O restante do seu código do Dashboard continua exatamente igual abaixo...
-    
+    // Link público da sua planilha do Google
+    const LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?gid=0&single=true&output=csv";
 
     const TIPO_COLORS = {
       "SBV":      { bg: "#E8F5E9", text: "#2E7D32", border: "#A5D6A7" },
@@ -135,14 +87,47 @@ function App() {
     }
 
     function Dashboard() {
+      const [dados, setDados] = useState([]);
+      const [carregando, setCarregando] = useState(true);
+      const [erro, setErro] = useState(null);
+
       const [filtroSup, setFiltroSup] = useState("TODOS");
       const [filtroTipo, setFiltroTipo] = useState("TODOS");
       const [busca, setBusca] = useState("");
       const [ordenar, setOrdenar] = useState("chamados_desc");
 
-      const supervisoes = ["TODOS", ...Array.from(new Set(dados.map(d => d.supervisao))).sort()];
-      const tipos = ["TODOS", ...Array.from(new Set(dados.map(d => d.tipo))).sort()];
-      const totalGeral = dados.reduce((s, d) => s + d.chamados, 0);
+      // Buscar os dados da planilha do Google ao carregar a página
+      useEffect(() => {
+        Papa.parse(LINK_PLANILHA, {
+          download: true,
+          header: true,
+          dynamicTyping: true,
+          complete: (results) => {
+            // Filtra linhas vazias ou sem identificador de ambulância (am)
+            const dadosValidos = results.data.filter(item => item.am && item.chamados);
+            setDados(dadosValidos);
+            setCarregando(false);
+          },
+          error: (err) => {
+            console.error("Erro ao carregar planilha:", err);
+            setErro("Não foi possível carregar os dados da planilha. Verifique se o link está correto e público.");
+            setCarregando(false);
+          }
+        });
+      }, []);
+
+      // Cálculos matemáticos baseados nos dados carregados
+      const supervisoes = useMemo(() => {
+        return ["TODOS", ...Array.from(new Set(dados.map(d => d.supervisao))).sort()];
+      }, [dados]);
+
+      const tipos = useMemo(() => {
+        return ["TODOS", ...Array.from(new Set(dados.map(d => d.tipo))).sort()];
+      }, [dados]);
+
+      const totalGeral = useMemo(() => {
+        return dados.reduce((s, d) => s + d.chamados, 0);
+      }, [dados]);
 
       const filtrados = useMemo(() => {
         let r = dados.filter(d => {
@@ -151,16 +136,21 @@ function App() {
           const buscaOk = busca === "" ||
             d.am.toLowerCase().includes(busca.toLowerCase()) ||
             String(d.chamados).includes(busca) ||
-            d.supervisao.toLowerCase().includes(busca.toLowerCase());
+            (d.supervisao && d.supervisao.toLowerCase().includes(busca.toLowerCase()));
           return supOk && tipoOk && buscaOk;
         });
         const [campo, dir] = ordenar.split("_");
         r = [...r].sort((a, b) => dir === "desc" ? b[campo] - a[campo] : a[campo] - b[campo]);
         return r;
-      }, [filtroSup, filtroTipo, busca, ordenar]);
+      }, [dados, filtroSup, filtroTipo, busca, ordenar]);
 
-      const totalFiltrado = filtrados.reduce((s, d) => s + d.chamados, 0);
-      const maxChamados = Math.max(...dados.map(d => d.chamados));
+      const totalFiltrado = useMemo(() => {
+        return filtrados.reduce((s, d) => s + d.chamados, 0);
+      }, [filtrados]);
+
+      const maxChamados = useMemo(() => {
+        return dados.length > 0 ? Math.max(0, ...dados.map(d => d.chamados)) : 0;
+      }, [dados]);
 
       // Estatísticas por supervisão
       const porSup = useMemo(() => {
@@ -170,9 +160,11 @@ function App() {
           map[d.supervisao] += d.chamados;
         });
         return Object.entries(map).sort((a, b) => b[1] - a[1]);
-      }, []);
+      }, [dados]);
 
-      const maxSup = Math.max(...porSup.map(([, v]) => v));
+      const maxSup = useMemo(() => {
+        return porSup.length > 0 ? Math.max(0, ...porSup.map(([, v]) => v)) : 0;
+      }, [porSup]);
 
       // Estatísticas por tipo
       const porTipo = useMemo(() => {
@@ -182,8 +174,9 @@ function App() {
           map[d.tipo] += d.chamados;
         });
         return Object.entries(map).sort((a, b) => b[1] - a[1]);
-      }, []);
+      }, [dados]);
 
+      // Estilos CSS inline
       const styles = {
         root: { fontFamily: "'Inter', 'Segoe UI', sans-serif", background: "#F7F8FA", minHeight: "100vh", padding: "0 0 40px 0" },
         header: {
@@ -212,7 +205,28 @@ function App() {
         th: { background: "#F7F8FA", padding: "10px 14px", fontWeight: 700, color: "#444", textAlign: "left", fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", borderBottom: "2px solid #E8E8E8" },
         td: { padding: "10px 14px", borderBottom: "1px solid #F2F2F2", color: "#333" },
         trEven: { background: "#FAFBFC" },
+        loadingScreen: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: '#1B3A6B' },
+        errorScreen: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: '#d32f2f', padding: '20px', textAlign: 'center' }
       };
+
+      // Tela de Carregamento
+      if (carregando) {
+        return (
+          <div style={styles.loadingScreen}>
+            <h3 style={{ margin: 0 }}>🚑 Carregando dados da planilha...</h3>
+            <p style={{ color: '#666', fontSize: 14, marginTop: 8 }}>Aguarde um instante.</p>
+          </div>
+        );
+      }
+
+      // Tela de Erro
+      if (erro) {
+        return (
+          <div style={styles.errorScreen}>
+            <h3>❌ {erro}</h3>
+          </div>
+        );
+      }
 
       return (
         <div style={styles.root}>
@@ -236,7 +250,7 @@ function App() {
               { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "#6A1B9A" },
               { label: "Tipos de Unidade de Atendimento", val: new Set(dados.map(d => d.tipo)).size, color: "#2E7D32" },
               { label: "Maior volume", val: maxChamados.toLocaleString("pt-BR"), color: "#E65100" },
-              { label: "Média/UA", val: Math.round(totalGeral / dados.length), color: "#880E4F" },
+              { label: "Média/UA", val: dados.length > 0 ? Math.round(totalGeral / dados.length) : 0, color: "#880E4F" },
             ].map(k => (
               <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }}>
                 <div style={{ ...styles.kpiVal, color: k.color }}>{k.val}</div>
@@ -325,7 +339,7 @@ function App() {
                           <td style={styles.td}><Badge tipo={d.tipo} /></td>
                           <td style={styles.td}><SupervisaoDot sup={d.supervisao} /></td>
                           <td style={{ ...styles.td, fontWeight: 700, fontSize: 15, color: "#1B3A6B" }}>
-                            {d.chamados.toLocaleString("pt-BR")}
+                            {Number(d.chamados || 0).toLocaleString("pt-BR")}
                           </td>
                         </tr>
                       ))}
