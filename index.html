@@ -103,8 +103,33 @@
           header: true,
           dynamicTyping: true,
           complete: (results) => {
-            // Filtra linhas vazias ou sem identificador de ambulância (am)
-            const dadosValidos = results.data.filter(item => item.am && item.chamados);
+            // Mapeia as colunas de forma inteligente e flexível
+            const dadosMapeados = results.data.map(item => {
+              // Função auxiliar que encontra a chave da coluna mesmo com diferenças de maiúscula/minúscula ou acentos
+              const obterValorPorChave = (nomesPossiveis) => {
+                const chaveEncontrada = Object.keys(item).find(chave => {
+                  const chaveNormalizada = chave.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                  return nomesPossiveis.some(nome => chaveNormalizada === nome || chaveNormalizada.includes(nome));
+                });
+                return chaveEncontrada ? item[chaveEncontrada] : null;
+              };
+
+              const chamados = obterValorPorChave(["total de chamados", "chamados"]);
+              const am = obterValorPorChave(["viatura", "am", "codigo"]);
+              const tipo = obterValorPorChave(["tipo"]);
+              const supervisao = obterValorPorChave(["supervisao", "supervisao"]);
+
+              return {
+                chamados: chamados !== null && chamados !== "" ? Number(chamados) : null,
+                am: am ? String(am).trim() : null,
+                tipo: tipo ? String(tipo).trim() : null,
+                supervisao: supervisao ? String(supervisao).trim() : null
+              };
+            });
+
+            // Filtra linhas válidas (que possuem pelo menos a Viatura e os Chamados identificados)
+            const dadosValidos = dadosMapeados.filter(item => item.am && item.chamados !== null && !isNaN(item.chamados));
+            
             setDados(dadosValidos);
             setCarregando(false);
           },
