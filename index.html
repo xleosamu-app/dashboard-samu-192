@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <!-- Cole esta linha logo abaixo da tag do Babel no seu <head> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SAMU-192 Emergency Response Dashboard</title>
@@ -31,45 +33,59 @@
 
   <!-- O type="text/babel" diz ao navegador para usar o Babel antes de executar o script -->
   <script type="text/babel">
-    const { useState, useMemo } = React;
+    const { useState, userEffect, useMemo } = React;
+    // 1. Substitua esta linha antiga:
+// const { useState, useMemo } = React;
+// Por esta:
+const { useState, useEffect, useMemo } = React;
 
-    const dados = [
-      { chamados: 1106, am: "1063-8",              tipo: "SBV-E", supervisao: "TIRADENTES" },
-      { chamados: 878,  am: "1064-9",              tipo: "SBV",   supervisao: "TIRADENTES" },
-      { chamados: 1034, am: "1075-0",              tipo: "SBV",   supervisao: "S.MATEUS"   },
-      { chamados: 1035, am: "1076-1",              tipo: "SBV",   supervisao: "S.MATEUS"   },
-      { chamados: 1054, am: "1087-2",              tipo: "SBV",   supervisao: "ERMELINO"   },
-      { chamados: 1067, am: "1088-3",              tipo: "SBV",   supervisao: "ITAQUERA"   },
-      { chamados: 861,  am: "1089-4",              tipo: "SBV",   supervisao: "TIRADENTES" },
-      { chamados: 1008, am: "1090-5",              tipo: "SBV-E", supervisao: "ITAIM"      },
-      { chamados: 1114, am: "1091-6",              tipo: "SBV-E", supervisao: "ITAIM"      },
-      { chamados: 1025, am: "1107-2",              tipo: "SBV",   supervisao: "ITAQUERA"   },
-      { chamados: 916,  am: "1108-3",              tipo: "SBV-E", supervisao: "TIRADENTES" },
-      { chamados: 1096, am: "1109-4",              tipo: "SBV",   supervisao: "S.MATEUS"   },
-      { chamados: 854,  am: "1151-9",              tipo: "SAV",   supervisao: "ITAQUERA"   },
-      { chamados: 1129, am: "1152-7",              tipo: "SBV-E", supervisao: "ITAQUERA"   },
-      { chamados: 974,  am: "1153-5",              tipo: "SBV",   supervisao: "ITAIM"      },
-      { chamados: 995,  am: "1154-3",              tipo: "SBV",   supervisao: "ERMELINO"   },
-      { chamados: 709,  am: "1155-1",              tipo: "SAV",   supervisao: "ITAIM"      },
-      { chamados: 997,  am: "1156-0",              tipo: "SBV",   supervisao: "TIRADENTES" },
-      { chamados: 1097, am: "1157-8",              tipo: "SBV",   supervisao: "S.MATEUS"   },
-      { chamados: 1214, am: "1158-2",              tipo: "SBV",   supervisao: "ITAIM"      },
-      { chamados: 762,  am: "1188-8",              tipo: "SBV",   supervisao: "ERMELINO"   },
-      { chamados: 865,  am: "1191-8",              tipo: "SBV-E", supervisao: "S.MATEUS"   },
-      { chamados: 802,  am: "1192-6",              tipo: "SBV",   supervisao: "ERMELINO"   },
-      { chamados: 1023, am: "1193-4",              tipo: "SBV",   supervisao: "ITAIM"      },
-      { chamados: 736,  am: "1199-3",              tipo: "SBV",   supervisao: "ERMELINO"   },
-      { chamados: 972,  am: "1200-0",              tipo: "SBV",   supervisao: "ITAQUERA"   },
-      { chamados: 576,  am: "OD11",                tipo: "OD",    supervisao: "TIRADENTES" },
-      { chamados: 421,  am: "URAM J. TUPI",        tipo: "URAM",  supervisao: "ITAIM"      },
-      { chamados: 224,  am: "URAM JD HELENA",      tipo: "URAM",  supervisao: "ITAIM"      },
-      { chamados: 251,  am: "URAM PB S. MIGUEL",   tipo: "URAM",  supervisao: "ITAIM"      },
-      { chamados: 341,  am: "URAMS H. TIRADENTES", tipo: "URAM",  supervisao: "TIRADENTES" },
-      { chamados: 469,  am: "URAMS ITAQUERA",      tipo: "URAM",  supervisao: "ITAQUERA"   },
-      { chamados: 361,  am: "URAMS RIO CLARO",     tipo: "URAM",  supervisao: "S.MATEUS"   },
-      { chamados: 216,  am: "URAMS S. MATEUS",     tipo: "URAM",  supervisao: "S.MATEUS"   },
-      { chamados: 496,  am: "URAMS USP Leste",     tipo: "URAM",  supervisao: "ERMELINO"   },
-    ];
+// 2. Cole aqui o link da planilha que você copiou no Passo 2:
+const LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?gid=0&single=true&output=csv";
+
+function App() {
+  const [dados, setDados] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
+
+  // Efeito que busca os dados da planilha assim que a página carrega
+  useEffect(() => {
+    Papa.parse(LINK_PLANILHA, {
+      download: true,
+      header: true, // Usa a primeira linha como chave do objeto
+      dynamicTyping: true, // Converte números automaticamente
+      complete: (results) => {
+        // Remove linhas em branco que possam vir da planilha
+        const dadosValidos = results.data.filter(item => item.am && item.chamados);
+        setDados(dadosValidos);
+        setCarregando(false);
+      },
+      error: (err) => {
+        console.error("Erro ao carregar planilha:", err);
+        setErro("Não foi possível carregar os dados da planilha.");
+        setCarregando(false);
+      }
+    });
+  }, []);
+
+  // Adicione uma verificação visual de carregamento no início do retorno do componente
+  if (carregando) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
+        <h3>Carregando dados da planilha...</h3>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: 'red' }}>
+        <h3>{erro}</h3>
+      </div>
+    );
+  }
+
+  // O restante do seu código do Dashboard continua exatamente igual abaixo...
+    
 
     const TIPO_COLORS = {
       "SBV":      { bg: "#E8F5E9", text: "#2E7D32", border: "#A5D6A7" },
