@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAMU-192 Emergency Response Dashboard</title>
+  
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #F7F8FA;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // Link público da sua planilha do Google
+    const LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?gid=0&single=true&output=csv";
+
+    const TIPO_COLORS = {
+      "SBV":      { bg: "#E8F5E9", text: "#2E7D32", border: "#A5D6A7" },
+      "SBV-E":    { bg: "#E3F2FD", text: "#1565C0", border: "#90CAF9" },
+      "SAV":      { bg: "#FFF3E0", text: "#E65100", border: "#FFCC80" },
+      "OD":       { bg: "#F3E5F5", text: "#6A1B9A", border: "#CE93D8" },
+      "URAM":     { bg: "#FCE4EC", text: "#880E4F", border: "#F48FB1" },
+      "DELEGADA": { bg: "#FFFDE7", text: "#F57F17", border: "#FFF176" },
+    };
+
+    const SUP_COLORS = {
+      "ITAQUERA":   "#1565C0",
+      "TIRADENTES": "#6A1B9A",
+      "ITAIM":      "#2E7D32",
+      "S.MATEUS":   "#E65100",
+      "ERMELINO":   "#880E4F",
+      "ITQUERA":    "#1565C0",
+    };
+
+    function Badge({ tipo }) {
+      const c = TIPO_COLORS[tipo] || { bg: "#F5F5F5", text: "#555", border: "#CCC" };
+      return (
+        <span style={{
+          background: c.bg, color: c.text, border: `1px solid ${c.border}`,
+          borderRadius: 5, padding: "2px 9px", fontSize: 12, fontWeight: 700,
+          letterSpacing: 0.5, whiteSpace: "nowrap"
+        }}>{tipo}</span>
+      );
+    }
+
+    function SupervisaoDot({ sup }) {
+      const color = SUP_COLORS[sup] || "#999";
+      return (
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0, display: "inline-block" }} />
+          <span style={{ fontWeight: 600, fontSize: 13, color: "#333" }}>{sup}</span>
+        </span>
+      );
+    }
+
+    function MiniBar({ value, max, color }) {
+      return (
+        <div style={{ background: "#F0F0F0", borderRadius: 4, height: 7, width: "100%", overflow: "hidden" }}>
+          <div style={{ width: `${(value / max) * 100}%`, background: color, height: "100%", borderRadius: 4, transition: "width .4s" }} />
+        </div>
+      );
+    }
+
+    function Dashboard() {
+      const [dados, setDados] = useState([]);
+      const [carregando, setCarregando] = useState(true);
+      const [erro, setErro] = useState(null);
+
+      const [filtroSup, setFiltroSup] = useState("TODOS");
+      const [filtroTipo, setFiltroTipo] = useState("TODOS");
+      const [busca, setBusca] = useState("");
+      const [ordenar, setOrdenar] = useState("chamados_desc");
+
+      // Buscar os dados da planilha do Google ao carregar a página
+      useEffect(() => {
+        Papa.parse(LINK_PLANILHA, {
+          download: true,
+          header: true,
+          dynamicTyping: true,
+          complete: (results) => {
+            // Mapeia as colunas de forma inteligente e flexível
+            const dadosMapeados = results.data.map(item => {
+              // Função auxiliar que encontra a chave da coluna mesmo com diferenças de maiúscula/minúscula ou acentos
+              const obterValorPorChave = (nomesPossiveis) => {
+                const chaveEncontrada = Object.keys(item).find(chave => {
+                  const chaveNormalizada = chave.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                  return nomesPossiveis.some(nome => chaveNormalizada === nome || chaveNormalizada.includes(nome));
+                });
+                return chaveEncontrada ? item[chaveEncontrada] : null;
+              };
+
+              const chamados = obterValorPorChave(["total de chamados", "chamados"]);
+              const viatura = obterValorPorChave(["viatura", "am", "codigo"]);
+              const tipo = obterValorPorChave(["tipo"]);
+              const supervisao = obterValorPorChave(["supervisao", "supervisao"]);
+
+              return {
+                chamados: chamados !== null && chamados !== "" ? Number(chamados) : null,
+                viatura: viatura ? String(viatura).trim() : null,
+                tipo: tipo ? String(tipo).trim() : null,
+                supervisao: supervisao ? String(supervisao).trim() : null
+              };
+            });
+
+            // Filtra linhas válidas (que possuem pelo menos a Viatura e os Chamados identificados)
+            const dadosValidos = dadosMapeados.filter(item => item.viatura && item.chamados !== null && !isNaN(item.chamados));
+            
+            setDados(dadosValidos);
+            setCarregando(false);
+          },
+          error: (err) => {
+            console.error("Erro ao carregar planilha:", err);
+            setErro("Não foi possível carregar os dados da planilha. Verifique se o link está correto e público.");
+            setCarregando(false);
+          }
+        });
+      }, []);
+
+      // Cálculos matemáticos baseados nos dados carregados
+      const supervisoes = useMemo(() => {
+        return ["TODOS", ...Array.from(new Set(dados.map(d => d.supervisao))).sort()];
+      }, [dados]);
+
+      const tipos = useMemo(() => {
+        return ["TODOS", ...Array.from(new Set(dados.map(d => d.tipo))).sort()];
+      }, [dados]);
+
+      const totalGeral = useMemo(() => {
+        return dados.reduce((s, d) => s + d.chamados, 0);
+      }, [dados]);
+
+      const filtrados = useMemo(() => {
+        let r = dados.filter(d => {
+          const supOk = filtroSup === "TODOS" || d.supervisao === filtroSup;
+          const tipoOk = filtroTipo === "TODOS" || d.tipo === filtroTipo;
+          const buscaOk = busca === "" ||
+            d.viatura.toLowerCase().includes(busca.toLowerCase()) ||
+            String(d.chamados).includes(busca) ||
+            (d.supervisao && d.supervisao.toLowerCase().includes(busca.toLowerCase()));
+          return supOk && tipoOk && buscaOk;
+        });
+        const [campo, dir] = ordenar.split("_");
+        r = [...r].sort((a, b) => dir === "desc" ? b[campo] - a[campo] : a[campo] - b[campo]);
+        return r;
+      }, [dados, filtroSup, filtroTipo, busca, ordenar]);
+
+      const totalFiltrado = useMemo(() => {
+        return filtrados.reduce((s, d) => s + d.chamados, 0);
+      }, [filtrados]);
+
+      const maxChamados = useMemo(() => {
+        return dados.length > 0 ? Math.max(0, ...dados.map(d => d.chamados)) : 0;
+      }, [dados]);
+
+      // Estatísticas por supervisão
+      const porSup = useMemo(() => {
+        const map = {};
+        dados.forEach(d => {
+          if (!map[d.supervisao]) map[d.supervisao] = 0;
+          map[d.supervisao] += d.chamados;
+        });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, [dados]);
+
+      const maxSup = useMemo(() => {
+        return porSup.length > 0 ? Math.max(0, ...porSup.map(([, v]) => v)) : 0;
+      }, [porSup]);
+
+      // Estatísticas por tipo
+      const porTipo = useMemo(() => {
+        const map = {};
+        dados.forEach(d => {
+          if (!map[d.tipo]) map[d.tipo] = 0;
+          map[d.tipo] += d.chamados;
+        });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, [dados]);
+
+      // Estilos CSS inline
+      const styles = {
+        root: { fontFamily: "'Inter', 'Segoe UI', sans-serif", background: "#F7F8FA", minHeight: "100vh", padding: "0 0 40px 0" },
+        header: {
+          background: "linear-gradient(135deg, #0D1B2A 0%, #1B3A6B 100%)",
+          color: "#fff", padding: "28px 32px 20px", marginBottom: 0,
+        },
+        headerTitle: { fontSize: 22, fontWeight: 800, letterSpacing: 1, margin: 0, color: "#fff" },
+        headerSub: { fontSize: 13, color: "#90CAF9", marginTop: 4 },
+        kpiRow: { display: "flex", gap: 16, padding: "20px 28px", flexWrap: "wrap" },
+        kpi: {
+          background: "#fff", borderRadius: 12, padding: "16px 22px",
+          flex: "1 1 140px", boxShadow: "0 1px 4px rgba(0,0,0,.08)",
+          borderTop: "3px solid"
+        },
+        kpiVal: { fontSize: 28, fontWeight: 800, lineHeight: 1 },
+        kpiLabel: { fontSize: 12, color: "#888", marginTop: 4, fontWeight: 500 },
+        body: { display: "flex", gap: 18, padding: "0 28px", flexWrap: "wrap" },
+        sidebar: { flex: "0 0 220px", display: "flex", flexDirection: "column", gap: 16 },
+        card: { background: "#fff", borderRadius: 12, boxShadow: "0 1px 4px rgba(0,0,0,.07)", overflow: "hidden" },
+        cardTitle: { fontSize: 12, fontWeight: 700, color: "#555", padding: "13px 16px 8px", borderBottom: "1px solid #F0F0F0", letterSpacing: 1, textTransform: "uppercase" },
+        main: { flex: "1 1 500px" },
+        filters: { background: "#fff", borderRadius: 12, boxShadow: "0 1px 4px rgba(0,0,0,.07)", padding: "14px 16px", marginBottom: 14, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" },
+        input: { border: "1px solid #E0E0E0", borderRadius: 8, padding: "7px 12px", fontSize: 13, outline: "none", flex: "1 1 160px" },
+        select: { border: "1px solid #E0E0E0", borderRadius: 8, padding: "7px 12px", fontSize: 13, background: "#fff", cursor: "pointer", outline: "none" },
+        table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+        th: { background: "#F7F8FA", padding: "10px 14px", fontWeight: 700, color: "#444", textAlign: "left", fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", borderBottom: "2px solid #E8E8E8" },
+        td: { padding: "10px 14px", borderBottom: "1px solid #F2F2F2", color: "#333" },
+        trEven: { background: "#FAFBFC" },
+        loadingScreen: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: '#1B3A6B' },
+        errorScreen: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: '#d32f2f', padding: '20px', textAlign: 'center' }
+      };
+
+      // Tela de Carregamento
+      if (carregando) {
+        return (
+          <div style={styles.loadingScreen}>
+            <h3 style={{ margin: 0 }}>🚑 Carregando dados da planilha...</h3>
+            <p style={{ color: '#666', fontSize: 14, marginTop: 8 }}>Aguarde um instante.</p>
+          </div>
+        );
+      }
+
+      // Tela de Erro
+      if (erro) {
+        return (
+          <div style={styles.errorScreen}>
+            <h3>❌ {erro}</h3>
+          </div>
+        );
+      }
+
+      return (
+        <div style={styles.root}>
+          <div style={styles.header}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <p style={styles.headerTitle}>🚑 SAMU-192 INTERLOCUÇÃO LESTE - INDICADORES DE ATENDIMENTO 2026</p>
+                <p style={styles.headerSub}>Distribuição por Unidade de Atendimento · Tipo · Supervisão</p>
+              </div>
+              <div style={{ background: "rgba(255,255,255,.12)", borderRadius: 8, padding: "8px 16px", textAlign: "right" }}>
+                <div style={{ fontSize: 11, color: "#90CAF9" }}>TOTAL GERAL</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: "#fff" }}>{totalGeral.toLocaleString("pt-BR")}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.kpiRow}>
+            {[
+              { label: "Unidades de Atendimento", val: dados.length, color: "#1565C0" },
+              { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "#6A1B9A" },
+              { label: "Tipos de Unidade de Atendimento", val: new Set(dados.map(d => d.tipo)).size, color: "#2E7D32" },
+              { label: "Maior volume", val: maxChamados.toLocaleString("pt-BR"), color: "#E65100" },
+              { label: "Média", val: dados.length > 0 ? Math.round(totalGeral / dados.length) : 0, color: "#880E4F" },
+            ].map(k => (
+              <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }}>
+                <div style={{ ...styles.kpiVal, color: k.color }}>{k.val}</div>
+                <div style={styles.kpiLabel}>{k.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={styles.body}>
+            <div style={styles.sidebar}>
+              <div style={styles.card}>
+                <div style={styles.cardTitle}>Por Supervisão</div>
+                <div style={{ padding: "10px 16px", display: "flex", flexDirection: "column", gap: 11 }}>
+                  {porSup.map(([sup, val]) => (
+                    <div key={sup}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: SUP_COLORS[sup] || "#555" }}>{sup}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#333" }}>{val.toLocaleString("pt-BR")}</span>
+                      </div>
+                      <MiniBar value={val} max={maxSup} color={SUP_COLORS[sup] || "#90A4AE"} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.cardTitle}>Por Tipo</div>
+                <div style={{ padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {porTipo.map(([tipo, val]) => {
+                    const c = TIPO_COLORS[tipo] || {};
+                    return (
+                      <div key={tipo} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Badge tipo={tipo} />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#333" }}>{val.toLocaleString("pt-BR")}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.main}>
+              <div style={styles.filters}>
+                <input
+                  style={styles.input}
+                  placeholder="🔍 Buscar Viatura, chamados ou supervisão..."
+                  value={busca}
+                  onChange={e => setBusca(e.target.value)}
+                />
+                <select style={styles.select} value={filtroSup} onChange={e => setFiltroSup(e.target.value)}>
+                  {supervisoes.map(s => <option key={s}>{s}</option>)}
+                </select>
+                <select style={styles.select} value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
+                  {tipos.map(t => <option key={t}>{t}</option>)}
+                </select>
+                <select style={styles.select} value={ordenar} onChange={e => setOrdenar(e.target.value)}>
+                  <option value="chamados_desc">↓ Chamados</option>
+                  <option value="chamados_asc">↑ Chamados</option>
+                </select>
+              </div>
+
+              <div style={styles.card}>
+                <div style={{ padding: "10px 16px 6px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #F0F0F0" }}>
+                  <span style={{ fontSize: 12, color: "#888" }}>
+                    <strong style={{ color: "#333" }}>{filtrados.length}</strong> Unidades de Atendimento ·{" "}
+                    <strong style={{ color: "#1565C0" }}>{totalFiltrado.toLocaleString("pt-BR")}</strong> chamados
+                  </span>
+                </div>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={styles.table}>
+                    <thead>
+                      <tr>
+                        {["Viatura", "Tipo", "Supervisão", "Chamados"].map(h => (
+                          <th key={h} style={styles.th}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtrados.map((d, i) => (
+                        <tr key={d.viatura} style={i % 2 === 1 ? styles.trEven : {}}>
+                          <td style={{ ...styles.td, fontWeight: 600 }}>{d.viatura}</td>
+                          <td style={styles.td}><Badge tipo={d.tipo} /></td>
+                          <td style={styles.td}><SupervisaoDot sup={d.supervisao} /></td>
+                          <td style={{ ...styles.td, fontWeight: 700, fontSize: 15, color: "#1B3A6B" }}>
+                            {Number(d.chamados || 0).toLocaleString("pt-BR")}
+                          </td>
+                        </tr>
+                      ))}
+                      {filtrados.length === 0 && (
+                        <tr><td colSpan={4} style={{ ...styles.td, textAlign: "center", color: "#aaa", padding: 32 }}>Nenhum resultado encontrado.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Renderizando o aplicativo na tela
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Dashboard />);
+  </script>
+</body>
+</html>
