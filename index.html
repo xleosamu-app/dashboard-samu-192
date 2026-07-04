@@ -521,7 +521,17 @@
             .header-container {
               display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap;
             }
-            .main-title { display: flex; align-items: center; gap: 10px; fontSize: 22px; fontWeight: 850; letterSpacing: .3px; margin: 0; }
+           .main-title { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  font-size: 22px; 
+  font-weight: 850; 
+  letter-spacing: normal; /* Remove o bug do .3px */
+  margin: 0; 
+  white-space: nowrap;    /* Impede que o texto quebre linha incorretamente */
+  overflow: visible;      /* Garante que nenhuma letra seja cortada nas pontas */
+}
             .subtitle { fontSize: 13px; color: "#9ec9ff"; margin: "6px 0 0"; color: #9ec9ff; }
             .total-box-card {
               background: rgba(77, 163, 255, .10); border: 1px solid rgba(77, 163, 255, .24);
