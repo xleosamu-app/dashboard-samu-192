@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SAMU-192 Interlocução Leste - Indicadores 2026</title>
 
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -48,6 +48,7 @@
         linear-gradient(180deg, #0b1525 0%, var(--bg) 46%, #07101d 100%);
       color: var(--text);
       font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     button, input, select {
@@ -169,7 +170,7 @@
           border: `1px solid ${c.border}`,
           borderRadius: 6,
           padding: "3px 10px",
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 800,
           letterSpacing: .2,
           whiteSpace: "nowrap"
@@ -226,26 +227,26 @@
         <article className="mobile-unit-card">
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 22, fontWeight: 850, color: "#dbeafe", lineHeight: 1.05 }}>{item.unidade}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 10 }}>
+              <div style={{ fontSize: 19, fontWeight: 850, color: "#dbeafe", lineHeight: 1.1 }}>{item.unidade}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 8 }}>
                 <Badge tipo={item.tipo} />
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text)", fontSize: 12, fontWeight: 800 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--text)", fontSize: 12, fontWeight: 700 }}>
                   <span style={{ width: 8, height: 8, borderRadius: "50%", background: supColor, boxShadow: `0 0 0 3px ${supColor}22` }} />
                   {item.supervisao || "N/I"}
                 </span>
               </div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 800, letterSpacing: .7, textTransform: "uppercase" }}>Chamados</div>
-              <div style={{ fontSize: 24, fontWeight: 850, color: "var(--text)", lineHeight: 1.1 }}>{formatarNumero(item.chamados)}</div>
+              <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 800, letterSpacing: .5, textTransform: "uppercase" }}>Chamados</div>
+              <div style={{ fontSize: 21, fontWeight: 850, color: "var(--text)", lineHeight: 1.1 }}>{formatarNumero(item.chamados)}</div>
             </div>
           </div>
-          <div style={{ marginTop: 15 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--muted)", marginBottom: 7 }}>
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--muted)", marginBottom: 5 }}>
               <span>Volume relativo</span>
               <span>{Math.round(pct)}%</span>
             </div>
-            <div style={{ height: 8, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
+            <div style={{ height: 6, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
               <div style={{
                 width: `${pct}%`,
                 height: "100%",
@@ -267,6 +268,7 @@
       const [filtroTipo, setFiltroTipo] = useState("TODOS");
       const [busca, setBusca] = useState("");
       const [ordenar, setOrdenar] = useState("chamados_desc");
+      const [activeTabMobile, setActiveTabMobile] = useState("lista"); // 'lista', 'supervisao', 'tipo'
 
       function mapearDadosPlanilha(linhas) {
         return linhas
@@ -382,7 +384,7 @@
         },
         kpiVal: { fontSize: 28, fontWeight: 850, lineHeight: 1 },
         kpiLabel: { fontSize: 12, color: "var(--muted)", marginTop: 6, fontWeight: 600 },
-        body: { display: "grid", gridTemplateColumns: "240px minmax(0, 1fr)", gap: 18, padding: "0 28px" },
+        body: { display: "grid", gridTemplateColumns: "260px minmax(0, 1fr)", gap: 20, padding: "0 28px" },
         sidebar: { display: "flex", flexDirection: "column", gap: 16 },
         card: {
           background: "rgba(17, 29, 48, .92)",
@@ -413,6 +415,7 @@
           alignItems: "center"
         },
         input: {
+          width: "100%",
           minWidth: 0,
           border: "1px solid var(--border-strong)",
           borderRadius: 7,
@@ -423,6 +426,7 @@
           background: "rgba(9, 17, 31, .84)"
         },
         select: {
+          width: "100%",
           minWidth: 0,
           border: "1px solid var(--border-strong)",
           borderRadius: 7,
@@ -489,35 +493,59 @@
               <div>
                 <h1 style={styles.headerTitle}>
                   <span aria-hidden="true">🚑</span>
-                  SAMU-192 INTERLOCUÇÃO LESTE - INDICADORES DE ATENDIMENTO 2026
+                  SAMU-192 INTERLOCUÇÃO LESTE
                 </h1>
-                <p style={styles.headerSub}>Distribuição por Unidade de Atendimento, Tipo e Supervisão</p>
+                <p style={styles.headerSub}>Indicadores de Atendimento 2026</p>
               </div>
               <div style={styles.totalBox}>
-                <div style={{ fontSize: 11, color: "#9ec9ff", fontWeight: 800, letterSpacing: .8 }}>TOTAL GERAL</div>
-                <div style={{ fontSize: 27, fontWeight: 850 }}>{formatarNumero(totalGeral)}</div>
+                <div style={{ fontSize: 10, color: "#9ec9ff", fontWeight: 800, letterSpacing: .8 }}>TOTAL GERAL</div>
+                <div style={{ fontSize: 25, fontWeight: 850 }}>{formatarNumero(totalGeral)}</div>
               </div>
             </div>
           </header>
 
-          <section style={styles.kpiRow}>
+          <section style={styles.kpiRow} className="kpi-scroll-container">
             {[
-              { label: "Unidades de Atendimento", val: dados.length, color: "var(--blue)" },
+              { label: "Unidades", val: dados.length, color: "var(--blue)" },
               { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "var(--purple)" },
-              { label: "Tipos de Unidade", val: new Set(dados.map(d => d.tipo)).size, color: "var(--green)" },
-              { label: "Maior volume", val: formatarNumero(maxChamados), color: "var(--orange)" },
-              { label: "Média por unidade", val: dados.length ? formatarNumero(Math.round(totalGeral / dados.length)) : 0, color: "var(--pink)" },
+              { label: "Tipos de VTR", val: new Set(dados.map(d => d.tipo)).size, color: "var(--green)" },
+              { label: "Maior Vol.", val: formatarNumero(maxChamados), color: "var(--orange)" },
+              { label: "Média p/ Unid.", val: dados.length ? formatarNumero(Math.round(totalGeral / dados.length)) : 0, color: "var(--pink)" },
             ].map(k => (
-              <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }}>
+              <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }} className="kpi-card-item">
                 <div style={{ ...styles.kpiVal, color: k.color }}>{k.val}</div>
                 <div style={styles.kpiLabel}>{k.label}</div>
               </div>
             ))}
           </section>
 
+          {/* Navegação Mobile para evitar Rolagem até os gráficos */}
+          <div className="mobile-tabs-container">
+            <button 
+              className={`mobile-tab-btn ${activeTabMobile === 'lista' ? 'active' : ''}`}
+              onClick={() => setActiveTabMobile('lista')}
+            >
+              Lista ({filtrados.length})
+            </button>
+            <button 
+              className={`mobile-tab-btn ${activeTabMobile === 'supervisao' ? 'active' : ''}`}
+              onClick={() => setActiveTabMobile('supervisao')}
+            >
+              Gráfico Supervisão
+            </button>
+            <button 
+              className={`mobile-tab-btn ${activeTabMobile === 'tipo' ? 'active' : ''}`}
+              onClick={() => setActiveTabMobile('tipo')}
+            >
+              Gráfico Tipo
+            </button>
+          </div>
+
           <main style={styles.body}>
-            <aside style={styles.sidebar}>
-              <section style={styles.card}>
+            {/* Sidebar de Gráficos - Visível no Desktop, controlada por abas no Mobile */}
+            <aside style={styles.sidebar} className={`desktop-sidebar ${activeTabMobile !== 'lista' ? 'mobile-visible-aside' : ''}`}>
+              
+              <section style={styles.card} className={`sidebar-graph-card ${activeTabMobile === 'supervisao' ? 'force-show' : ''}`}>
                 <div style={styles.cardTitle}>Por Supervisão</div>
                 <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 12 }}>
                   {porSup.map(([sup, val]) => (
@@ -532,7 +560,7 @@
                 </div>
               </section>
 
-              <section style={styles.card}>
+              <section style={styles.card} className={`sidebar-graph-card ${activeTabMobile === 'tipo' ? 'force-show' : ''}`}>
                 <div style={styles.cardTitle}>Por Tipo</div>
                 <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
                   {porTipo.map(([tipo, val]) => (
@@ -545,38 +573,40 @@
               </section>
             </aside>
 
-            <section>
-              <div style={styles.filters}>
+            {/* Painel Principal de Dados e Filtros */}
+            <section className={`main-content-panel ${activeTabMobile !== 'lista' ? 'mobile-hidden' : ''}`}>
+              <div style={styles.filters} className="filter-grid-layout">
                 <input
                   style={styles.input}
-                  placeholder="Buscar unidade, chamados, tipo ou supervisão..."
+                  placeholder="Buscar viatura, tipo, região..."
                   value={busca}
                   onChange={e => setBusca(e.target.value)}
                 />
                 <select style={styles.select} value={filtroSup} onChange={e => setFiltroSup(e.target.value)} aria-label="Filtrar por supervisão">
-                  {supervisoes.map(s => <option key={s}>{s}</option>)}
+                  {supervisoes.map(s => <option key={s}>{s === 'TODOS' ? 'Todas Regiões' : s}</option>)}
                 </select>
                 <select style={styles.select} value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)} aria-label="Filtrar por tipo">
-                  {tipos.map(t => <option key={t}>{t}</option>)}
+                  {tipos.map(t => <option key={t}>{t === 'TODOS' ? 'Todos Tipos' : t}</option>)}
                 </select>
                 <select style={styles.select} value={ordenar} onChange={e => setOrdenar(e.target.value)} aria-label="Ordenar tabela">
-                  <option value="chamados_desc">Chamados: maior primeiro</option>
-                  <option value="chamados_asc">Chamados: menor primeiro</option>
-                  <option value="unidade_asc">Unidade: crescente</option>
-                  <option value="unidade_desc">Unidade: decrescente</option>
+                  <option value="chamados_desc">Mais chamados</option>
+                  <option value="chamados_asc">Menos chamados</option>
+                  <option value="unidade_asc">Viatura (A-Z)</option>
+                  <option value="unidade_desc">Viatura (Z-A)</option>
                 </select>
               </div>
 
               <div style={styles.card}>
                 <div style={styles.summaryLine}>
                   <span>
-                    <strong style={{ color: "var(--text)" }}>{filtrados.length}</strong> Unidades de Atendimento
+                    <strong style={{ color: "var(--text)" }}>{filtrados.length}</strong> Unidades encontradas
                     <span style={{ color: "var(--muted-2)" }}> · </span>
                     <strong style={{ color: "var(--blue)" }}>{formatarNumero(totalFiltrado)}</strong> chamados
                   </span>
-                  <span style={{ color: "var(--muted-2)" }}>Fonte: Google Sheets publicado</span>
+                  <span style={{ color: "var(--muted-2)" }} className="hide-mobile">Fonte: Google Sheets</span>
                 </div>
 
+                {/* Tabela de Desktop */}
                 <div className="desktop-table" style={{ overflowX: "auto" }}>
                   <table style={styles.table}>
                     <thead>
@@ -606,6 +636,7 @@
                   </table>
                 </div>
 
+                {/* Lista de Cards otimizada para Mobile */}
                 <div className="mobile-card-list">
                   {filtrados.map((d) => (
                     <UnidadeMobileCard key={d.id} item={d} maxChamados={maxChamados} />
@@ -619,16 +650,46 @@
           </main>
 
           <style>{`
+            /* CSS Nativo e Responsivo */
+            .mobile-tabs-container {
+              display: none;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 4px;
+              padding: 0 14px;
+              margin-bottom: 14px;
+            }
+
+            .mobile-tab-btn {
+              background: rgba(17, 29, 48, 0.6);
+              border: 1px solid var(--border);
+              color: var(--muted);
+              padding: 10px 4px;
+              font-size: 12px;
+              font-weight: 700;
+              border-radius: 6px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            }
+
+            .mobile-tab-btn.active {
+              background: var(--panel-3);
+              color: var(--text);
+              border-color: var(--blue);
+              box-shadow: 0 0 10px rgba(77, 163, 255, 0.15);
+            }
+
             .mobile-card-list {
               display: none;
             }
 
             .mobile-unit-card {
-              background: linear-gradient(180deg, rgba(24, 41, 66, .96), rgba(15, 27, 45, .96));
-              border: 1px solid var(--border);
-              border-radius: 10px;
-              padding: 16px;
-              box-shadow: 0 14px 34px rgba(0, 0, 0, .22);
+              background: linear-gradient(180deg, rgba(20, 34, 57, .8), rgba(15, 27, 45, .9));
+              border-bottom: 1px solid var(--border);
+              padding: 14px 16px;
+            }
+            
+            .mobile-unit-card:last-child {
+              border-bottom: none;
             }
 
             .mobile-empty-state {
@@ -640,49 +701,47 @@
 
             @media (max-width: 1120px) {
               section[style*="grid-template-columns: repeat(5"] {
-                grid-template-columns: repeat(2, minmax(150px, 1fr)) !important;
+                grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
               }
             }
 
             @media (max-width: 860px) {
               main {
                 grid-template-columns: 1fr !important;
+                padding: 0 14px !important;
               }
-              div[style*="grid-template-columns: minmax(220px"] {
+              
+              .desktop-sidebar {
+                display: none;
+              }
+
+              .mobile-tabs-container {
+                display: grid;
+              }
+
+              /* Controle de visibilidade das abas em mobile */
+              .mobile-visible-aside {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+              }
+
+              .sidebar-graph-card {
+                display: none !important;
+              }
+
+              .sidebar-graph-card.force-show {
+                display: block !important;
+              }
+
+              .mobile-hidden {
+                display: none !important;
+              }
+
+              .filter-grid-layout {
                 grid-template-columns: 1fr !important;
-              }
-            }
-
-            @media (max-width: 620px) {
-              header, section, main {
-                padding-left: 14px !important;
-                padding-right: 14px !important;
-              }
-
-              header {
-                padding-top: 18px !important;
-                padding-bottom: 14px !important;
-              }
-
-              h1 {
-                font-size: 17px !important;
-                line-height: 1.25 !important;
-                letter-spacing: 0 !important;
-              }
-
-              header p {
-                font-size: 12px !important;
-              }
-
-              section[style*="grid-template-columns: repeat(5"] {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
-                padding-top: 14px !important;
-                padding-bottom: 14px !important;
-              }
-
-              aside {
-                gap: 10px !important;
+                gap: 8px !important;
+                padding: 12px !important;
               }
 
               .desktop-table {
@@ -692,26 +751,54 @@
               .mobile-card-list {
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
-                padding: 12px;
+              }
+            }
+
+            @media (max-width: 620px) {
+              header {
+                padding: 16px 14px 12px !important;
               }
 
-              .mobile-unit-card {
-                padding: 14px;
+              h1 {
+                font-size: 16px !important;
+                font-weight: 800 !important;
               }
 
-              div[style*="justify-content: space-between"][style*="align-items: flex-start"] {
-                gap: 12px !important;
+              div[style*="background: rgba(77, 163, 255, .10)"] {
+                padding: 6px 12px !important;
+                min-width: auto !important;
               }
 
-              div[style*="Fonte: Google Sheets publicado"] {
+              div[style*="fontSize: 25"] {
+                font-size: 18px !important;
+              }
+
+              /* Carrossel horizontal para os KPIs superiores em telas pequenas */
+              .kpi-scroll-container {
+                display: flex !important;
+                overflow-x: auto !important;
+                gap: 10px !important;
+                padding: 12px 14px !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+              }
+
+              .kpi-card-item {
+                flex: 0 0 145px !important;
+                scroll-snap-align: start;
+                padding: 12px !important;
+              }
+
+              .kpi-card-item div[style*="fontSize: 28"] {
+                font-size: 20px !important;
+              }
+
+              .hide-mobile {
                 display: none !important;
               }
 
-              div[style*="padding: 11px 16px"][style*="justify-content: space-between"] {
-                align-items: flex-start !important;
-                flex-direction: column !important;
-                gap: 4px !important;
+              div[style*="padding: 11px 16px"] {
+                padding: 10px 14px !important;
               }
             }
           `}</style>
