@@ -394,7 +394,7 @@
 
           <section className="kpi-grid-container">
             {[
-              { label: "Unidades", val: dados.length, color: "var(--blue)" },
+              { label: "Unidades de Atendimento", val: dados.length, color: "var(--blue)" },
               { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "var(--purple)" },
               { label: "Tipos de VTR", val: new Set(dados.map(d => d.tipo)).size, color: "var(--green)" },
               { label: "Maior Vol.", val: formatarNumero(maxChamados), color: "var(--orange)" },
