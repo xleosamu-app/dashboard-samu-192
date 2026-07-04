@@ -49,6 +49,7 @@
       color: var(--text);
       font-family: "Inter", "Segoe UI", system-ui, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
     }
 
     button, input, select {
@@ -142,7 +143,7 @@
       const [cabecalhos, ...corpo] = linhas;
       return corpo
         .filter((linha) => linha.some((valor) => valor !== null && valor !== undefined && valor !== ""))
-        .map((linha) => Object.fromEntries(cabecalhos.map((cabecalho, indice) => [cabecalho, linha[indice]])));
+        .map((linha) => Object.fromEntries(cabecalhos.map((cabecalho, indice) => [cabecalho, pointer[indice]])));
     }
 
     function lerCampoPorIndiceOuNome(item, indice, nomesPossiveis) {
@@ -190,36 +191,6 @@
       );
     }
 
-    function MiniBar({ value, max, color }) {
-      const pct = max > 0 ? Math.max(2, (value / max) * 100) : 0;
-      return (
-        <div style={{ background: "rgba(148, 163, 184, .14)", borderRadius: 99, height: 7, width: "100%", overflow: "hidden" }}>
-          <div style={{ width: `${pct}%`, background: color, height: "100%", borderRadius: 99, transition: "width .35s ease" }} />
-        </div>
-      );
-    }
-
-    function ChamadosCell({ value, max }) {
-      const pct = max > 0 ? Math.max(4, (value / max) * 100) : 0;
-      return (
-        <div style={{ minWidth: 150 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 6 }}>
-            <strong style={{ fontSize: 14, color: "var(--text)" }}>{formatarNumero(value)}</strong>
-            <span style={{ fontSize: 11, color: "var(--muted)" }}>{Math.round(pct)}%</span>
-          </div>
-          <div style={{ height: 7, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
-            <div style={{
-              width: `${pct}%`,
-              height: "100%",
-              borderRadius: 99,
-              background: "linear-gradient(90deg, var(--blue), var(--cyan))",
-              boxShadow: "0 0 16px rgba(77, 163, 255, .35)"
-            }} />
-          </div>
-        </div>
-      );
-    }
-
     function UnidadeMobileCard({ item, maxChamados }) {
       const pct = maxChamados > 0 ? Math.max(4, (item.chamados / maxChamados) * 100) : 0;
       const supColor = SUP_COLORS[item.supervisao] || "#94a3b8";
@@ -260,6 +231,36 @@
       );
     }
 
+    function MiniBar({ value, max, color }) {
+      const pct = max > 0 ? Math.max(2, (value / max) * 100) : 0;
+      return (
+        <div style={{ background: "rgba(148, 163, 184, .14)", borderRadius: 99, height: 7, width: "100%", overflow: "hidden" }}>
+          <div style={{ width: `${pct}%`, background: color, height: "100%", borderRadius: 99, transition: "width .35s ease" }} />
+        </div>
+      );
+    }
+
+    function ChamadosCell({ value, max }) {
+      const pct = max > 0 ? Math.max(4, (value / max) * 100) : 0;
+      return (
+        <div style={{ minWidth: 150 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 6 }}>
+            <strong style={{ fontSize: 14, color: "var(--text)" }}>{formatarNumero(value)}</strong>
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>{Math.round(pct)}%</span>
+          </div>
+          <div style={{ height: 7, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
+            <div style={{
+              width: `${pct}%`,
+              height: "100%",
+              borderRadius: 99,
+              background: "linear-gradient(90deg, var(--blue), var(--cyan))",
+              boxShadow: "0 0 16px rgba(77, 163, 255, .35)"
+            }} />
+          </div>
+        </div>
+      );
+    }
+
     function Dashboard() {
       const [dados, setDados] = useState([]);
       const [carregando, setCarregando] = useState(true);
@@ -268,29 +269,29 @@
       const [filtroTipo, setFiltroTipo] = useState("TODOS");
       const [busca, setBusca] = useState("");
       const [ordenar, setOrdenar] = useState("chamados_desc");
-      const [activeTabMobile, setActiveTabMobile] = useState("lista"); // 'lista', 'supervisao', 'tipo'
+      const [activeTabMobile, setActiveTabMobile] = useState("lista");
 
       function mapearDadosPlanilha(linhas) {
         return linhas
           .map((item, index) => {
-              const chamados = limparNumero(lerCampoPorIndiceOuNome(item, 0, ["total de chamados", "chamados"]));
-              const unidade = lerCampoPorIndiceOuNome(item, 1, ["viatura", "unidade", "unidade de atendimento"]);
-              const tipo = lerCampoPorIndiceOuNome(item, 2, ["tipo", "complexidade"]);
-              const supervisao = lerCampoPorIndiceOuNome(item, 3, ["supervisao", "supervisão", "regiao", "região"]);
+            const chamados = limparNumero(lerCampoPorIndiceOuNome(item, 0, ["total de chamados", "chamados"]));
+            const unidade = lerCampoPorIndiceOuNome(item, 1, ["viatura", "unidade", "unidade de atendimento"]);
+            const tipo = lerCampoPorIndiceOuNome(item, 2, ["tipo", "complexidade"]);
+            const supervisao = lerCampoPorIndiceOuNome(item, 3, ["supervisao", "supervisão", "regiao", "região"]);
 
-              return {
-                id: `${String(unidade || "").trim()}-${index}`,
-                chamados,
-                unidade: String(unidade || "").trim(),
-                tipo: String(tipo || "").trim().toUpperCase(),
-                supervisao: String(supervisao || "").trim().toUpperCase(),
-              };
-            })
+            return {
+              id: `${String(unidade || "").trim()}-${index}`,
+              chamados,
+              unidade: String(unidade || "").trim(),
+              tipo: String(tipo || "").trim().toUpperCase(),
+              supervisao: String(supervisao || "").trim().toUpperCase(),
+            };
+          })
           .filter((item) =>
-              item.unidade &&
-              item.chamados !== null &&
-              Number.isFinite(item.chamados)
-            );
+            item.unidade &&
+            item.chamados !== null &&
+            Number.isFinite(item.chamados)
+          );
       }
 
       useEffect(() => {
@@ -298,19 +299,21 @@
         setCarregando(false);
 
         if (window.location.protocol !== "file:") {
-          Papa.parse(LINK_PLANILHA_CSV, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            dynamicTyping: false,
-            complete: (results) => {
-              const atualizados = mapearDadosPlanilha(results.data || []);
-              if (atualizados.length) setDados(atualizados);
-            },
-            error: () => {
-              console.warn("Mantendo dados embutidos; não foi possível atualizar a partir do CSV publicado.");
-            }
-          });
+          if (typeof Papa !== "undefined") {
+            Papa.parse(LINK_PLANILHA_CSV, {
+              download: true,
+              header: true,
+              skipEmptyLines: true,
+              dynamicTyping: false,
+              complete: (results) => {
+                const atualizados = mapearDadosPlanilha(results.data || []);
+                if (atualizados.length) setDados(atualizados);
+              },
+              error: () => {
+                console.warn("Mantendo dados embutidos; não foi possível carregar o CSV dinâmico.");
+              }
+            });
+          }
         }
       }, []);
 
@@ -493,7 +496,7 @@
               <div>
                 <h1 style={styles.headerTitle}>
                   <span aria-hidden="true">🚑</span>
-                  SAMU-192 INTERLOCUÇÃO LESTE
+                  SAMU-192 INTERLOCUÇÃO LEST
                 </h1>
                 <p style={styles.headerSub}>Indicadores de Atendimento 2026</p>
               </div>
@@ -519,7 +522,6 @@
             ))}
           </section>
 
-          {/* Navegação Mobile para evitar Rolagem até os gráficos */}
           <div className="mobile-tabs-container">
             <button 
               className={`mobile-tab-btn ${activeTabMobile === 'lista' ? 'active' : ''}`}
@@ -531,20 +533,18 @@
               className={`mobile-tab-btn ${activeTabMobile === 'supervisao' ? 'active' : ''}`}
               onClick={() => setActiveTabMobile('supervisao')}
             >
-              Gráfico Supervisão
+              Regiões
             </button>
             <button 
               className={`mobile-tab-btn ${activeTabMobile === 'tipo' ? 'active' : ''}`}
               onClick={() => setActiveTabMobile('tipo')}
             >
-              Gráfico Tipo
+              Tipos VTR
             </button>
           </div>
 
           <main style={styles.body}>
-            {/* Sidebar de Gráficos - Visível no Desktop, controlada por abas no Mobile */}
             <aside style={styles.sidebar} className={`desktop-sidebar ${activeTabMobile !== 'lista' ? 'mobile-visible-aside' : ''}`}>
-              
               <section style={styles.card} className={`sidebar-graph-card ${activeTabMobile === 'supervisao' ? 'force-show' : ''}`}>
                 <div style={styles.cardTitle}>Por Supervisão</div>
                 <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 12 }}>
@@ -573,7 +573,6 @@
               </section>
             </aside>
 
-            {/* Painel Principal de Dados e Filtros */}
             <section className={`main-content-panel ${activeTabMobile !== 'lista' ? 'mobile-hidden' : ''}`}>
               <div style={styles.filters} className="filter-grid-layout">
                 <input
@@ -606,7 +605,6 @@
                   <span style={{ color: "var(--muted-2)" }} className="hide-mobile">Fonte: Google Sheets</span>
                 </div>
 
-                {/* Tabela de Desktop */}
                 <div className="desktop-table" style={{ overflowX: "auto" }}>
                   <table style={styles.table}>
                     <thead>
@@ -636,7 +634,6 @@
                   </table>
                 </div>
 
-                {/* Lista de Cards otimizada para Mobile */}
                 <div className="mobile-card-list">
                   {filtrados.map((d) => (
                     <UnidadeMobileCard key={d.id} item={d} maxChamados={maxChamados} />
@@ -650,7 +647,7 @@
           </main>
 
           <style>{`
-            /* CSS Nativo e Responsivo */
+            /* CSS Corrigido para travar a Rolagem Lateral no Mobile */
             .mobile-tabs-container {
               display: none;
               grid-template-columns: repeat(3, 1fr);
@@ -686,6 +683,7 @@
               background: linear-gradient(180deg, rgba(20, 34, 57, .8), rgba(15, 27, 45, .9));
               border-bottom: 1px solid var(--border);
               padding: 14px 16px;
+              width: 100%;
             }
             
             .mobile-unit-card:last-child {
@@ -701,7 +699,7 @@
 
             @media (max-width: 1120px) {
               section[style*="grid-template-columns: repeat(5"] {
-                grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
+                grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
               }
             }
 
@@ -709,6 +707,7 @@
               main {
                 grid-template-columns: 1fr !important;
                 padding: 0 14px !important;
+                width: 100% !important;
               }
               
               .desktop-sidebar {
@@ -719,15 +718,16 @@
                 display: grid;
               }
 
-              /* Controle de visibilidade das abas em mobile */
               .mobile-visible-aside {
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 16px !important;
+                width: 100% !important;
               }
 
               .sidebar-graph-card {
                 display: none !important;
+                width: 100% !important;
               }
 
               .sidebar-graph-card.force-show {
@@ -751,6 +751,7 @@
               .mobile-card-list {
                 display: flex;
                 flex-direction: column;
+                width: 100%;
               }
             }
 
@@ -773,20 +774,22 @@
                 font-size: 18px !important;
               }
 
-              /* Carrossel horizontal para os KPIs superiores em telas pequenas */
+              /* Correção Crucial: KPIs agora quebram em linha perfeitamente e se ajustam à tela vertical */
               .kpi-scroll-container {
-                display: flex !important;
-                overflow-x: auto !important;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
                 gap: 10px !important;
                 padding: 12px 14px !important;
-                scroll-snap-type: x mandatory;
-                -webkit-overflow-scrolling: touch;
               }
 
               .kpi-card-item {
-                flex: 0 0 145px !important;
-                scroll-snap-align: start;
+                width: 100% !important;
                 padding: 12px !important;
+              }
+              
+              /* Força o último card de KPI (Média por unidade) a ocupar a linha inteira sozinho */
+              .kpi-card-item:last-child {
+                grid-column: span 2;
               }
 
               .kpi-card-item div[style*="fontSize: 28"] {
