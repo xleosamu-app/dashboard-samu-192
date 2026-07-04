@@ -1,8 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAMU-192 Interlocução Leste - Indicadores 2026</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09111f;
+      --bg-soft: #0f1b2d;
+      --panel: #111d30;
+      --panel-2: #142239;
+      --panel-3: #182942;
+      --border: rgba(148, 163, 184, .18);
+      --border-strong: rgba(148, 163, 184, .30);
+      --text: #eef4ff;
+      --muted: #93a4bb;
+      --muted-2: #687891;
+      --blue: #4da3ff;
+      --cyan: #3dd5f3;
+      --green: #55d27a;
+      --orange: #ff9b45;
+      --purple: #b17cff;
+      --pink: #f0629a;
+      --danger: #fb7185;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .32);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(77, 163, 255, .16), transparent 26rem),
+        linear-gradient(180deg, #0b1525 0%, var(--bg) 46%, #07101d 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
   <script type="text/babel">
     const { useEffect, useMemo, useState } = React;
 
-    const LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?output=csv";
     const LINK_PLANILHA_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?output=csv";
 
     const DADOS_FALLBACK = [
@@ -47,6 +105,35 @@
     const TIPO_COLORS = {
       "SBV": { bg: "rgba(85, 210, 122, .14)", text: "#7ee69b", border: "rgba(85, 210, 122, .42)" },
       "SBV-E": { bg: "rgba(77, 163, 255, .15)", text: "#8dc5ff", border: "rgba(77, 163, 255, .46)" },
+      "SAV": { bg: "rgba(255, 155, 69, .15)", text: "#ffbd80", border: "rgba(255, 155, 69, .45)" },
+      "URAM": { bg: "rgba(240, 98, 154, .14)", text: "#ff96bf", border: "rgba(240, 98, 154, .44)" },
+      "OD": { bg: "rgba(177, 124, 255, .15)", text: "#c7a5ff", border: "rgba(177, 124, 255, .45)" },
+      "DELEGADA": { bg: "rgba(250, 204, 21, .13)", text: "#fde68a", border: "rgba(250, 204, 21, .42)" },
+    };
+
+    const SUP_COLORS = {
+      "ITAQUERA": "#4da3ff",
+      "ITQUERA": "#4da3ff",
+      "TIRADENTES": "#b17cff",
+      "ITAIM": "#55d27a",
+      "S.MATEUS": "#ff7a2f",
+      "ERMELINO": "#f0629a",
+    };
+
+    const normalizarChave = (valor) =>
+      String(valor || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    const limparNumero = (valor) => {
+      if (valor === null || valor === undefined || valor === "") return null;
+      const texto = String(valor).replace(/\./g, "").replace(",", ".").trim();
+      const numero = Number(texto);
+      return Number.isFinite(numero) ? numero : null;
+    };
 
     const formatarNumero = (valor) => Number(valor || 0).toLocaleString("pt-BR");
 
@@ -60,33 +147,142 @@
     function lerCampoPorIndiceOuNome(item, indice, nomesPossiveis) {
       const chaves = Object.keys(item);
       const chavePorIndice = chaves[indice];
+      const valorPorIndice = chavePorIndice ? item[chavePorIndice] : null;
+      if (valorPorIndice !== null && valorPorIndice !== undefined && valorPorIndice !== "") {
+        return valorPorIndice;
+      }
+
+      const nomes = nomesPossiveis.map(normalizarChave);
+      const chaveEncontrada = chaves.find((chave) => nomes.includes(normalizarChave(chave)));
+      return chaveEncontrada ? item[chaveEncontrada] : null;
+    }
+
+    function Badge({ tipo }) {
+      const c = TIPO_COLORS[tipo] || { bg: "rgba(148, 163, 184, .14)", text: "#cbd5e1", border: "rgba(148, 163, 184, .35)" };
+      return (
+        <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          minHeight: 24,
+          background: c.bg,
+          color: c.text,
+          border: `1px solid ${c.border}`,
+          borderRadius: 6,
+          padding: "3px 10px",
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: .2,
+          whiteSpace: "nowrap"
+        }}>
+          {tipo || "N/I"}
+        </span>
+      );
+    }
+
+    function SupervisaoDot({ sup }) {
+      const color = SUP_COLORS[sup] || "#94a3b8";
+      return (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, boxShadow: `0 0 0 3px ${color}22`, flexShrink: 0 }} />
+          <span style={{ fontWeight: 700, fontSize: 13, color: "var(--text)" }}>{sup || "N/I"}</span>
+        </span>
+      );
+    }
+
+    function MiniBar({ value, max, color }) {
+      const pct = max > 0 ? Math.max(2, (value / max) * 100) : 0;
+      return (
+        <div style={{ background: "rgba(148, 163, 184, .14)", borderRadius: 99, height: 7, width: "100%", overflow: "hidden" }}>
+          <div style={{ width: `${pct}%`, background: color, height: "100%", borderRadius: 99, transition: "width .35s ease" }} />
+        </div>
+      );
+    }
+
+    function ChamadosCell({ value, max }) {
+      const pct = max > 0 ? Math.max(4, (value / max) * 100) : 0;
+      return (
+        <div style={{ minWidth: 150 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 6 }}>
+            <strong style={{ fontSize: 14, color: "var(--text)" }}>{formatarNumero(value)}</strong>
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>{Math.round(pct)}%</span>
+          </div>
+          <div style={{ height: 7, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
+            <div style={{
+              width: `${pct}%`,
+              height: "100%",
+              borderRadius: 99,
+              background: "linear-gradient(90deg, var(--blue), var(--cyan))",
+              boxShadow: "0 0 16px rgba(77, 163, 255, .35)"
+            }} />
+          </div>
+        </div>
+      );
+    }
+
+    function UnidadeMobileCard({ item, maxChamados }) {
+      const pct = maxChamados > 0 ? Math.max(4, (item.chamados / maxChamados) * 100) : 0;
+      const supColor = SUP_COLORS[item.supervisao] || "#94a3b8";
+      return (
+        <article className="mobile-unit-card">
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 22, fontWeight: 850, color: "#dbeafe", lineHeight: 1.05 }}>{item.unidade}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 10 }}>
+                <Badge tipo={item.tipo} />
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text)", fontSize: 12, fontWeight: 800 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: supColor, boxShadow: `0 0 0 3px ${supColor}22` }} />
+                  {item.supervisao || "N/I"}
+                </span>
+              </div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 800, letterSpacing: .7, textTransform: "uppercase" }}>Chamados</div>
+              <div style={{ fontSize: 24, fontWeight: 850, color: "var(--text)", lineHeight: 1.1 }}>{formatarNumero(item.chamados)}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 15 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--muted)", marginBottom: 7 }}>
+              <span>Volume relativo</span>
+              <span>{Math.round(pct)}%</span>
+            </div>
+            <div style={{ height: 8, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
+              <div style={{
+                width: `${pct}%`,
+                height: "100%",
+                borderRadius: 99,
+                background: "linear-gradient(90deg, var(--blue), var(--cyan))",
+                boxShadow: "0 0 18px rgba(77, 163, 255, .36)"
+              }} />
+            </div>
+          </div>
+        </article>
+      );
+    }
+
+    function Dashboard() {
+      const [dados, setDados] = useState([]);
+      const [carregando, setCarregando] = useState(true);
+      const [erro, setErro] = useState(null);
+      const [filtroSup, setFiltroSup] = useState("TODOS");
+      const [filtroTipo, setFiltroTipo] = useState("TODOS");
       const [busca, setBusca] = useState("");
       const [ordenar, setOrdenar] = useState("chamados_desc");
 
-      useEffect(() => {
-        Papa.parse(LINK_PLANILHA, {
-          download: true,
-          header: true,
-          skipEmptyLines: true,
-          dynamicTyping: false,
-          complete: (results) => {
-            if (results.errors && results.errors.length) {
-              console.warn("Avisos ao ler CSV:", results.errors);
-            }
-
-            const mapeados = results.data.map((item, index) => {
       function mapearDadosPlanilha(linhas) {
         return linhas
           .map((item, index) => {
               const chamados = limparNumero(lerCampoPorIndiceOuNome(item, 0, ["total de chamados", "chamados"]));
               const unidade = lerCampoPorIndiceOuNome(item, 1, ["viatura", "unidade", "unidade de atendimento"]);
               const tipo = lerCampoPorIndiceOuNome(item, 2, ["tipo", "complexidade"]);
+              const supervisao = lerCampoPorIndiceOuNome(item, 3, ["supervisao", "supervisão", "regiao", "região"]);
+
+              return {
+                id: `${String(unidade || "").trim()}-${index}`,
+                chamados,
+                unidade: String(unidade || "").trim(),
                 tipo: String(tipo || "").trim().toUpperCase(),
                 supervisao: String(supervisao || "").trim().toUpperCase(),
               };
-            });
-
-            const validos = mapeados.filter((item) =>
             })
           .filter((item) =>
               item.unidade &&
@@ -98,3 +294,433 @@
       useEffect(() => {
         setDados(mapearDadosPlanilha(linhasParaObjetos(DADOS_FALLBACK)));
         setCarregando(false);
+
+        if (window.location.protocol !== "file:") {
+          Papa.parse(LINK_PLANILHA_CSV, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            dynamicTyping: false,
+            complete: (results) => {
+              const atualizados = mapearDadosPlanilha(results.data || []);
+              if (atualizados.length) setDados(atualizados);
+            },
+            error: () => {
+              console.warn("Mantendo dados embutidos; não foi possível atualizar a partir do CSV publicado.");
+            }
+          });
+        }
+      }, []);
+
+      const supervisoes = useMemo(() => ["TODOS", ...Array.from(new Set(dados.map(d => d.supervisao).filter(Boolean))).sort()], [dados]);
+      const tipos = useMemo(() => ["TODOS", ...Array.from(new Set(dados.map(d => d.tipo).filter(Boolean))).sort()], [dados]);
+      const totalGeral = useMemo(() => dados.reduce((s, d) => s + d.chamados, 0), [dados]);
+      const maxChamados = useMemo(() => dados.length ? Math.max(...dados.map(d => d.chamados)) : 0, [dados]);
+
+      const filtrados = useMemo(() => {
+        const termo = busca.trim().toLowerCase();
+        let r = dados.filter(d => {
+          const supOk = filtroSup === "TODOS" || d.supervisao === filtroSup;
+          const tipoOk = filtroTipo === "TODOS" || d.tipo === filtroTipo;
+          const buscaOk = !termo ||
+            d.unidade.toLowerCase().includes(termo) ||
+            String(d.chamados).includes(termo) ||
+            d.tipo.toLowerCase().includes(termo) ||
+            d.supervisao.toLowerCase().includes(termo);
+          return supOk && tipoOk && buscaOk;
+        });
+
+        const [campo, dir] = ordenar.split("_");
+        r = [...r].sort((a, b) => {
+          if (campo === "unidade") {
+            return dir === "desc" ? b.unidade.localeCompare(a.unidade, "pt-BR", { numeric: true }) : a.unidade.localeCompare(b.unidade, "pt-BR", { numeric: true });
+          }
+          return dir === "desc" ? b.chamados - a.chamados : a.chamados - b.chamados;
+        });
+        return r;
+      }, [dados, filtroSup, filtroTipo, busca, ordenar]);
+
+      const totalFiltrado = useMemo(() => filtrados.reduce((s, d) => s + d.chamados, 0), [filtrados]);
+      const porSup = useMemo(() => {
+        const map = {};
+        dados.forEach(d => { map[d.supervisao] = (map[d.supervisao] || 0) + d.chamados; });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, [dados]);
+      const porTipo = useMemo(() => {
+        const map = {};
+        dados.forEach(d => { map[d.tipo] = (map[d.tipo] || 0) + d.chamados; });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, [dados]);
+      const maxSup = useMemo(() => porSup.length ? Math.max(...porSup.map(([, v]) => v)) : 0, [porSup]);
+
+      const styles = {
+        root: { minHeight: "100vh", paddingBottom: 36 },
+        header: {
+          padding: "24px 28px 18px",
+          borderBottom: "1px solid var(--border)",
+          background: "linear-gradient(135deg, rgba(17, 29, 48, .96), rgba(10, 22, 39, .92))",
+          boxShadow: "0 12px 40px rgba(0, 0, 0, .20)"
+        },
+        headerTitle: { display: "flex", alignItems: "center", gap: 10, fontSize: 22, fontWeight: 850, letterSpacing: .3, margin: 0 },
+        headerSub: { fontSize: 13, color: "#9ec9ff", margin: "6px 0 0" },
+        totalBox: {
+          background: "rgba(77, 163, 255, .10)",
+          border: "1px solid rgba(77, 163, 255, .24)",
+          borderRadius: "var(--radius)",
+          padding: "10px 16px",
+          textAlign: "right",
+          minWidth: 150
+        },
+        kpiRow: { display: "grid", gridTemplateColumns: "repeat(5, minmax(150px, 1fr))", gap: 14, padding: "20px 28px" },
+        kpi: {
+          background: "linear-gradient(180deg, rgba(20, 34, 57, .96), rgba(17, 29, 48, .96))",
+          border: "1px solid var(--border)",
+          borderTop: "3px solid",
+          borderRadius: "var(--radius)",
+          padding: "16px 18px",
+          boxShadow: "0 12px 30px rgba(0, 0, 0, .18)"
+        },
+        kpiVal: { fontSize: 28, fontWeight: 850, lineHeight: 1 },
+        kpiLabel: { fontSize: 12, color: "var(--muted)", marginTop: 6, fontWeight: 600 },
+        body: { display: "grid", gridTemplateColumns: "240px minmax(0, 1fr)", gap: 18, padding: "0 28px" },
+        sidebar: { display: "flex", flexDirection: "column", gap: 16 },
+        card: {
+          background: "rgba(17, 29, 48, .92)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          boxShadow: "var(--shadow)",
+          overflow: "hidden"
+        },
+        cardTitle: {
+          fontSize: 11,
+          fontWeight: 800,
+          color: "#b6c5d8",
+          padding: "13px 16px 9px",
+          borderBottom: "1px solid var(--border)",
+          letterSpacing: 1.1,
+          textTransform: "uppercase"
+        },
+        filters: {
+          background: "rgba(17, 29, 48, .92)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          boxShadow: "var(--shadow)",
+          padding: 14,
+          marginBottom: 14,
+          display: "grid",
+          gridTemplateColumns: "minmax(220px, 1fr) 160px 160px 180px",
+          gap: 10,
+          alignItems: "center"
+        },
+        input: {
+          minWidth: 0,
+          border: "1px solid var(--border-strong)",
+          borderRadius: 7,
+          padding: "9px 12px",
+          fontSize: 13,
+          outline: "none",
+          color: "var(--text)",
+          background: "rgba(9, 17, 31, .84)"
+        },
+        select: {
+          minWidth: 0,
+          border: "1px solid var(--border-strong)",
+          borderRadius: 7,
+          padding: "9px 12px",
+          fontSize: 13,
+          color: "var(--text)",
+          background: "rgba(9, 17, 31, .84)",
+          outline: "none",
+          cursor: "pointer"
+        },
+        summaryLine: {
+          padding: "11px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid var(--border)",
+          color: "var(--muted)",
+          fontSize: 12,
+          gap: 12
+        },
+        table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+        th: {
+          background: "rgba(15, 27, 45, .92)",
+          padding: "11px 14px",
+          fontWeight: 800,
+          color: "#aebdd0",
+          textAlign: "left",
+          fontSize: 11,
+          letterSpacing: .7,
+          textTransform: "uppercase",
+          borderBottom: "1px solid var(--border)"
+        },
+        td: { padding: "11px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", color: "var(--text)", verticalAlign: "middle" },
+        trEven: { background: "rgba(255, 255, 255, .025)" },
+        loadingScreen: { display: "grid", placeItems: "center", minHeight: "100vh", color: "var(--text)", padding: 24 },
+        errorScreen: { display: "grid", placeItems: "center", minHeight: "100vh", color: "var(--danger)", padding: 24, textAlign: "center" }
+      };
+
+      if (carregando) {
+        return (
+          <div style={styles.loadingScreen}>
+            <div style={{ ...styles.card, padding: 28, textAlign: "center" }}>
+              <h3 style={{ margin: 0 }}>Carregando dados da planilha...</h3>
+              <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 0 }}>Conectando ao Google Sheets público.</p>
+            </div>
+          </div>
+        );
+      }
+
+      if (erro) {
+        return (
+          <div style={styles.errorScreen}>
+            <div style={{ ...styles.card, padding: 28 }}>
+              <h3 style={{ margin: 0 }}>{erro}</h3>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div style={styles.root}>
+          <header style={styles.header}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 18, flexWrap: "wrap" }}>
+              <div>
+                <h1 style={styles.headerTitle}>
+                  <span aria-hidden="true">🚑</span>
+                  SAMU-192 INTERLOCUÇÃO LESTE - INDICADORES DE ATENDIMENTO 2026
+                </h1>
+                <p style={styles.headerSub}>Distribuição por Unidade de Atendimento, Tipo e Supervisão</p>
+              </div>
+              <div style={styles.totalBox}>
+                <div style={{ fontSize: 11, color: "#9ec9ff", fontWeight: 800, letterSpacing: .8 }}>TOTAL GERAL</div>
+                <div style={{ fontSize: 27, fontWeight: 850 }}>{formatarNumero(totalGeral)}</div>
+              </div>
+            </div>
+          </header>
+
+          <section style={styles.kpiRow}>
+            {[
+              { label: "Unidades de Atendimento", val: dados.length, color: "var(--blue)" },
+              { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "var(--purple)" },
+              { label: "Tipos de Unidade", val: new Set(dados.map(d => d.tipo)).size, color: "var(--green)" },
+              { label: "Maior volume", val: formatarNumero(maxChamados), color: "var(--orange)" },
+              { label: "Média por unidade", val: dados.length ? formatarNumero(Math.round(totalGeral / dados.length)) : 0, color: "var(--pink)" },
+            ].map(k => (
+              <div key={k.label} style={{ ...styles.kpi, borderTopColor: k.color }}>
+                <div style={{ ...styles.kpiVal, color: k.color }}>{k.val}</div>
+                <div style={styles.kpiLabel}>{k.label}</div>
+              </div>
+            ))}
+          </section>
+
+          <main style={styles.body}>
+            <aside style={styles.sidebar}>
+              <section style={styles.card}>
+                <div style={styles.cardTitle}>Por Supervisão</div>
+                <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 12 }}>
+                  {porSup.map(([sup, val]) => (
+                    <div key={sup}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, gap: 8 }}>
+                        <span style={{ fontSize: 12, fontWeight: 800, color: SUP_COLORS[sup] || "#cbd5e1" }}>{sup}</span>
+                        <span style={{ fontSize: 12, fontWeight: 800, color: "var(--text)" }}>{formatarNumero(val)}</span>
+                      </div>
+                      <MiniBar value={val} max={maxSup} color={SUP_COLORS[sup] || "#94a3b8"} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section style={styles.card}>
+                <div style={styles.cardTitle}>Por Tipo</div>
+                <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {porTipo.map(([tipo, val]) => (
+                    <div key={tipo} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                      <Badge tipo={tipo} />
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{formatarNumero(val)}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </aside>
+
+            <section>
+              <div style={styles.filters}>
+                <input
+                  style={styles.input}
+                  placeholder="Buscar unidade, chamados, tipo ou supervisão..."
+                  value={busca}
+                  onChange={e => setBusca(e.target.value)}
+                />
+                <select style={styles.select} value={filtroSup} onChange={e => setFiltroSup(e.target.value)} aria-label="Filtrar por supervisão">
+                  {supervisoes.map(s => <option key={s}>{s}</option>)}
+                </select>
+                <select style={styles.select} value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)} aria-label="Filtrar por tipo">
+                  {tipos.map(t => <option key={t}>{t}</option>)}
+                </select>
+                <select style={styles.select} value={ordenar} onChange={e => setOrdenar(e.target.value)} aria-label="Ordenar tabela">
+                  <option value="chamados_desc">Chamados: maior primeiro</option>
+                  <option value="chamados_asc">Chamados: menor primeiro</option>
+                  <option value="unidade_asc">Unidade: crescente</option>
+                  <option value="unidade_desc">Unidade: decrescente</option>
+                </select>
+              </div>
+
+              <div style={styles.card}>
+                <div style={styles.summaryLine}>
+                  <span>
+                    <strong style={{ color: "var(--text)" }}>{filtrados.length}</strong> Unidades de Atendimento
+                    <span style={{ color: "var(--muted-2)" }}> · </span>
+                    <strong style={{ color: "var(--blue)" }}>{formatarNumero(totalFiltrado)}</strong> chamados
+                  </span>
+                  <span style={{ color: "var(--muted-2)" }}>Fonte: Google Sheets publicado</span>
+                </div>
+
+                <div className="desktop-table" style={{ overflowX: "auto" }}>
+                  <table style={styles.table}>
+                    <thead>
+                      <tr>
+                        {["Unidade de Atendimento", "Tipo", "Supervisão", "Chamados"].map(h => (
+                          <th key={h} style={styles.th}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtrados.map((d, i) => (
+                        <tr key={d.id} style={i % 2 === 1 ? styles.trEven : undefined}>
+                          <td style={{ ...styles.td, fontWeight: 850, color: "#dbeafe" }}>{d.unidade}</td>
+                          <td style={styles.td}><Badge tipo={d.tipo} /></td>
+                          <td style={styles.td}><SupervisaoDot sup={d.supervisao} /></td>
+                          <td style={styles.td}><ChamadosCell value={d.chamados} max={maxChamados} /></td>
+                        </tr>
+                      ))}
+                      {filtrados.length === 0 && (
+                        <tr>
+                          <td colSpan={4} style={{ ...styles.td, textAlign: "center", color: "var(--muted)", padding: 34 }}>
+                            Nenhum resultado encontrado.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mobile-card-list">
+                  {filtrados.map((d) => (
+                    <UnidadeMobileCard key={d.id} item={d} maxChamados={maxChamados} />
+                  ))}
+                  {filtrados.length === 0 && (
+                    <div className="mobile-empty-state">Nenhum resultado encontrado.</div>
+                  )}
+                </div>
+              </div>
+            </section>
+          </main>
+
+          <style>{`
+            .mobile-card-list {
+              display: none;
+            }
+
+            .mobile-unit-card {
+              background: linear-gradient(180deg, rgba(24, 41, 66, .96), rgba(15, 27, 45, .96));
+              border: 1px solid var(--border);
+              border-radius: 10px;
+              padding: 16px;
+              box-shadow: 0 14px 34px rgba(0, 0, 0, .22);
+            }
+
+            .mobile-empty-state {
+              padding: 28px 16px;
+              text-align: center;
+              color: var(--muted);
+              font-size: 13px;
+            }
+
+            @media (max-width: 1120px) {
+              section[style*="grid-template-columns: repeat(5"] {
+                grid-template-columns: repeat(2, minmax(150px, 1fr)) !important;
+              }
+            }
+
+            @media (max-width: 860px) {
+              main {
+                grid-template-columns: 1fr !important;
+              }
+              div[style*="grid-template-columns: minmax(220px"] {
+                grid-template-columns: 1fr !important;
+              }
+            }
+
+            @media (max-width: 620px) {
+              header, section, main {
+                padding-left: 14px !important;
+                padding-right: 14px !important;
+              }
+
+              header {
+                padding-top: 18px !important;
+                padding-bottom: 14px !important;
+              }
+
+              h1 {
+                font-size: 17px !important;
+                line-height: 1.25 !important;
+                letter-spacing: 0 !important;
+              }
+
+              header p {
+                font-size: 12px !important;
+              }
+
+              section[style*="grid-template-columns: repeat(5"] {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+                padding-top: 14px !important;
+                padding-bottom: 14px !important;
+              }
+
+              aside {
+                gap: 10px !important;
+              }
+
+              .desktop-table {
+                display: none !important;
+              }
+
+              .mobile-card-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+              }
+
+              .mobile-unit-card {
+                padding: 14px;
+              }
+
+              div[style*="justify-content: space-between"][style*="align-items: flex-start"] {
+                gap: 12px !important;
+              }
+
+              div[style*="Fonte: Google Sheets publicado"] {
+                display: none !important;
+              }
+
+              div[style*="padding: 11px 16px"][style*="justify-content: space-between"] {
+                align-items: flex-start !important;
+                flex-direction: column !important;
+                gap: 4px !important;
+              }
+            }
+          `}</style>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<Dashboard />);
+  </script>
+</body>
+</html>
