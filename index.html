@@ -74,49 +74,61 @@
 
     const LINK_PLANILHA_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsBxeQ4oNTNvh64dbpf4Gv09QLvVClfVpTl255MCcVTVq4YQi1G17hTmU_6kjWNfUGwswHvW_oMPyt/pub?output=csv";
 
-    // Fallback adaptado para a nova estrutura de colunas informada
     const DADOS_FALLBACK = [
-      ["UNIDADE DE ATENDIMENTO", "DIURNO PAR", "DIURNO IMPAR", "NOTURNO PAR", "NOTURNO IMPAR", "TOTAL"],
-      ["1158-2 SBV", 350, 310, 280, 274, 1214],
-      ["1152-7 SBV-E", 300, 290, 270, 269, 1129],
-      ["1091-6 SBV-E", 295, 285, 274, 260, 1114],
-      ["1063-8 SBV-E", 290, 280, 270, 266, 1106],
-      ["1157-8 SBV", 285, 277, 270, 265, 1097],
-      ["1109-4 SBV", 280, 280, 270, 266, 1096],
-      ["1088-3 SBV", 270, 267, 265, 265, 1067],
-      ["1087-2 SBV", 265, 265, 264, 260, 1054],
-      ["1076-1 SBV", 260, 260, 258, 257, 1035],
-      ["1075-0 SBV", 260, 258, 258, 258, 1034],
-      ["1107-2 SBV", 255, 255, 260, 255, 1025],
-      ["1193-4 SBV", 255, 253, 260, 255, 1023],
-      ["1090-5 SBV-E", 250, 250, 258, 250, 1008],
-      ["1156-0 SBV", 250, 248, 250, 249, 997],
-      ["1154-3 SBV", 248, 248, 250, 249, 995],
-      ["1153-5 SBV", 245, 245, 244, 240, 974],
-      ["1200-0 SBV", 245, 242, 245, 240, 972],
-      ["1108-3 SBV-E", 230, 230, 228, 228, 916],
-      ["1064-9 SBV", 220, 220, 219, 219, 878],
-      ["1191-8 SBV-E", 215, 215, 218, 217, 865],
-      ["1089-4 SBV", 215, 215, 216, 215, 861],
-      ["1151-9 SAV", 215, 213, 214, 212, 854],
-      ["1192-6 SBV", 200, 200, 202, 200, 802],
-      ["1188-8 SBV", 192, 190, 190, 190, 762],
-      ["1199-3 SBV", 186, 184, 183, 183, 736],
-      ["1155-1 SAV", 180, 178, 176, 175, 709],
-      ["OD11", 145, 144, 144, 143, 576],
-      ["URAMS USP Leste", 125, 124, 124, 123, 496],
-      ["URAMS ITAQUERA", 118, 117, 117, 117, 469],
-      ["URAM J. TUPI", 106, 105, 105, 105, 421],
-      ["URAMS RIO CLARO", 91, 90, 90, 90, 361],
-      ["URAMS H. TIRADENTES", 86, 85, 85, 85, 341],
-      ["URAM PB S. MIGUEL", 64, 63, 62, 62, 251],
-      ["URAM JD HELENA", 56, 56, 56, 56, 224],
-      ["URAMS S. MATEUS", 54, 54, 54, 54, 216]
+      ["TOTAL DE CHAMADOS", "VIATURA", "TIPO", "SUPERVISAO"],
+      [1214, "1158-2", "SBV", "ITAIM"],
+      [1129, "1152-7", "SBV-E", "ITAQUERA"],
+      [1114, "1091-6", "SBV-E", "ITAIM"],
+      [1106, "1063-8", "SBV-E", "TIRADENTES"],
+      [1097, "1157-8", "SBV", "S.MATEUS"],
+      [1096, "1109-4", "SBV", "S.MATEUS"],
+      [1067, "1088-3", "SBV", "ITAQUERA"],
+      [1054, "1087-2", "SBV", "ERMELINO"],
+      [1035, "1076-1", "SBV", "S.MATEUS"],
+      [1034, "1075-0", "SBV", "S.MATEUS"],
+      [1025, "1107-2", "SBV", "ITAQUERA"],
+      [1023, "1193-4", "SBV", "ITAIM"],
+      [1008, "1090-5", "SBV-E", "ITAIM"],
+      [997, "1156-0", "SBV", "TIRADENTES"],
+      [995, "1154-3", "SBV", "ERMELINO"],
+      [974, "1153-5", "SBV", "ITAIM"],
+      [972, "1200-0", "SBV", "ITAQUERA"],
+      [916, "1108-3", "SBV-E", "TIRADENTES"],
+      [878, "1064-9", "SBV", "TIRADENTES"],
+      [865, "1191-8", "SBV-E", "S.MATEUS"],
+      [861, "1089-4", "SBV", "TIRADENTES"],
+      [854, "1151-9", "SAV", "ITAQUERA"],
+      [802, "1192-6", "SBV", "ERMELINO"],
+      [762, "1188-8", "SBV", "ERMELINO"],
+      [736, "1199-3", "SBV", "ERMELINO"],
+      [709, "1155-1", "SAV", "ITAIM"],
+      [576, "OD11", "OD", "TIRADENTES"],
+      [496, "URAMS USP Leste", "URAM", "ERMELINO"],
+      [469, "URAMS ITAQUERA", "URAM", "ITAQUERA"],
+      [421, "URAM J. TUPI", "URAM", "ITAIM"],
+      [361, "URAMS RIO CLARO", "URAM", "S.MATEUS"],
+      [341, "URAMS H. TIRADENTES", "URAM", "TIRADENTES"],
+      [251, "URAM PB S. MIGUEL", "URAM", "ITAIM"],
+      [224, "URAM JD HELENA", "URAM", "ITAIM"],
+      [216, "URAMS S. MATEUS", "URAM", "S.MATEUS"],
     ];
 
-    const PLANTÃO_COLORS = {
-      "DIURNO": "#ff9b45",
-      "NOTURNO": "#b17cff"
+    const TIPO_COLORS = {
+      "SBV": { bg: "rgba(85, 210, 122, .14)", text: "#7ee69b", border: "rgba(85, 210, 122, .42)" },
+      "SBV-E": { bg: "rgba(77, 163, 255, .15)", text: "#8dc5ff", border: "rgba(77, 163, 255, .46)" },
+      "SAV": { bg: "rgba(255, 155, 69, .15)", text: "#ffbd80", border: "rgba(255, 155, 69, .45)" },
+      "URAM": { bg: "rgba(240, 98, 154, .14)", text: "#ff96bf", border: "rgba(240, 98, 154, .44)" },
+      "OD": { bg: "rgba(177, 124, 255, .15)", text: "#c7a5ff", border: "rgba(177, 124, 255, .45)" },
+      "DELEGADA": { bg: "rgba(250, 204, 21, .13)", text: "#fde68a", border: "rgba(250, 204, 21, .42)" },
+    };
+
+    const SUP_COLORS = {
+      "ITAQUERA": "#4da3ff",
+      "ITQUERA": "#4da3ff",
+      "TIRADENTES": "#b17cff",
+      "ITAIM": "#55d27a",
+      "S.MATEUS": "#ff9b45",
+      "ERMELINO": "#f0629a",
     };
 
     const normalizarChave = (valor) =>
@@ -128,10 +140,10 @@
         .trim();
 
     const limparNumero = (valor) => {
-      if (valor === null || valor === undefined || valor === "") return 0;
+      if (valor === null || valor === undefined || valor === "") return null;
       const texto = String(valor).replace(/\./g, "").replace(",", ".").trim();
       const num = Number(texto);
-      return Number.isFinite(num) ? num : 0;
+      return Number.isFinite(num) ? num : null;
     };
 
     const formatarNumero = (valor) => Number(valor || 0).toLocaleString("pt-BR");
@@ -144,11 +156,89 @@
         .map((linha) => Object.fromEntries(cabecalhos.map((cabecalho, indice) => [cabecalho, linha[indice]])));
     }
 
-    function lerCampoPorNomes(item, nomesPossiveis) {
+    function lerCampoPorIndiceOuNome(item, indice, nomesPossiveis) {
       const chaves = Object.keys(item);
+      const chavePorIndice = chaves[indice];
+      const valorPorIndice = chavePorIndice ? item[chavePorIndice] : null;
+      if (valorPorIndice !== null && valorPorIndice !== undefined && valorPorIndice !== "") {
+        return valorPorIndice;
+      }
+
       const nomes = nomesPossiveis.map(normalizarChave);
       const chaveEncontrada = chaves.find((chave) => nomes.includes(normalizarChave(chave)));
       return chaveEncontrada ? item[chaveEncontrada] : null;
+    }
+
+    function Badge({ tipo }) {
+      const c = TIPO_COLORS[tipo] || { bg: "rgba(148, 163, 184, .14)", text: "#cbd5e1", border: "rgba(148, 163, 184, .35)" };
+      return (
+        <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          minHeight: 24,
+          background: c.bg,
+          color: c.text,
+          border: `1px solid ${c.border}`,
+          borderRadius: 6,
+          padding: "3px 10px",
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: .2,
+          whiteSpace: "nowrap"
+        }}>
+          {tipo || "N/I"}
+        </span>
+      );
+    }
+
+    function SupervisaoDot({ sup }) {
+      const color = SUP_COLORS[sup] || "#94a3b8";
+      return (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, boxShadow: `0 0 0 3px ${color}22`, flexShrink: 0 }} />
+          <span style={{ fontWeight: 700, fontSize: 13, color: "var(--text)" }}>{sup || "N/I"}</span>
+        </span>
+      );
+    }
+
+    function UnidadeMobileCard({ item, maxChamados }) {
+      const pct = maxChamados > 0 ? Math.max(4, (item.chamados / maxChamados) * 100) : 0;
+      const supColor = SUP_COLORS[item.supervisao] || "#94a3b8";
+      return (
+        <article className="mobile-unit-card">
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 850, color: "#dbeafe", lineHeight: 1.2, wordBreak: "break-word" }}>{item.unidade}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 8 }}>
+                <Badge tipo={item.tipo} />
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--text)", fontSize: 13, fontWeight: 700 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: supColor, boxShadow: `0 0 0 3px ${supColor}22` }} />
+                  {item.supervisao || "N/I"}
+                </span>
+              </div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 800, letterSpacing: .5, textTransform: "uppercase" }}>Chamados</div>
+              <div style={{ fontSize: 20, fontWeight: 850, color: "var(--text)", lineHeight: 1.1 }}>{formatarNumero(item.chamados)}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--muted)", marginBottom: 5 }}>
+              <span>Volume relativo</span>
+              <span>{Math.round(pct)}%</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
+              <div style={{
+                width: `${pct}%`,
+                height: "100%",
+                borderRadius: 99,
+                background: "linear-gradient(90deg, var(--blue), var(--cyan))",
+                boxShadow: "0 0 18px rgba(77, 163, 255, .36)"
+              }} />
+            </div>
+          </div>
+        </article>
+      );
     }
 
     function MiniBar({ value, max, color }) {
@@ -181,51 +271,11 @@
       );
     }
 
-    function UnidadeMobileCard({ item, valorExibido, maxChamados }) {
-      const pct = maxChamados > 0 ? Math.max(4, (valorExibido / maxChamados) * 100) : 0;
-      return (
-        <article className="mobile-unit-card">
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignMems: "flex-start" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 17, fontWeight: 850, color: "#dbeafe", lineHeight: 1.2, wordBreak: "break-word" }}>{item.unidade}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 8 }}>
-                <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 500 }}>
-                  Total Real da VTR: {formatarNumero(item.totalReal)}
-                </span>
-              </div>
-            </div>
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 800, letterSpacing: .5, textTransform: "uppercase" }}>Filtrado</div>
-              <div style={{ fontSize: 19, fontWeight: 850, color: "var(--cyan)", lineHeight: 1.1 }}>{formatarNumero(valorExibido)}</div>
-            </div>
-          </div>
-          <div style={{ marginTop: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--muted)", marginBottom: 5 }}>
-              <span>Volume no filtro atual</span>
-              <span>{Math.round(pct)}%</span>
-            </div>
-            <div style={{ height: 6, borderRadius: 99, background: "rgba(148, 163, 184, .13)", overflow: "hidden" }}>
-              <div style={{
-                width: `${pct}%`,
-                height: "100%",
-                borderRadius: 99,
-                background: "linear-gradient(90deg, var(--blue), var(--cyan))",
-                boxShadow: "0 0 18px rgba(77, 163, 255, .36)"
-              }} />
-            </div>
-          </div>
-        </article>
-      );
-    }
-
     function Dashboard() {
       const [dados, setDados] = useState([]);
       const [carregando, setCarregando] = useState(true);
-      
-      // Novos estados dos filtros cruzados solicitados
-      const [filtroPeriodo, setFiltroPeriodo] = useState("TOTAL"); // TOTAL, DIURNO, NOTURNO
-      const [filtroEscala, setFiltroEscala] = useState("TODOS");   // TODOS, PAR, IMPAR
-      
+      const [filtroSup, setFiltroSup] = useState("TODOS");
+      const [filtroTipo, setFiltroTipo] = useState("TODOS");
       const [busca, setBusca] = useState("");
       const [ordenar, setOrdenar] = useState("chamados_desc");
       const [activeTabMobile, setActiveTabMobile] = useState("lista");
@@ -233,24 +283,24 @@
       function mapearDadosPlanilha(linhas) {
         return linhas
           .map((item, index) => {
-            const unidade = lerCampoPorNomes(item, ["unidade de atendimento", "unidade", "viatura"]);
-            const diurnoPar = limparNumero(lerCampoPorNomes(item, ["diurno par"]));
-            const diurnoImpar = limparNumero(lerCampoPorNomes(item, ["diurno impar", "diurno ímpar"]));
-            const noturnoPar = limparNumero(lerCampoPorNomes(item, ["noturno par"]));
-            const noturnoImpar = limparNumero(lerCampoPorNomes(item, ["noturno impar", "noturno ímpar"]));
-            const totalReal = limparNumero(lerCampoPorNomes(item, ["total"]));
+            const chamados = limparNumero(lerCampoPorIndiceOuNome(item, 0, ["total de chamados", "chamados"]));
+            const unidade = lerCampoPorIndiceOuNome(item, 1, ["viatura", "unidade", "unidade de atendimento"]);
+            const tipo = lerCampoPorIndiceOuNome(item, 2, ["tipo", "complexidade"]);
+            const supervisao = lerCampoPorIndiceOuNome(item, 3, ["supervisao", "supervisão", "regiao", "região"]);
 
             return {
               id: `${String(unidade || "").trim()}-${index}`,
+              chamados,
               unidade: String(unidade || "").trim(),
-              diurnoPar,
-              diurnoImpar,
-              noturnoPar,
-              noturnoImpar,
-              totalReal: totalReal || (diurnoPar + diurnoImpar + noturnoPar + noturnoImpar)
+              tipo: String(tipo || "").trim().toUpperCase(),
+              supervisao: String(supervisao || "").trim().toUpperCase(),
             };
           })
-          .filter((item) => item.unidade !== "");
+          .filter((item) =>
+            item.unidade &&
+            item.chamados !== null &&
+            Number.isFinite(item.chamados)
+          );
       }
 
       useEffect(() => {
@@ -269,48 +319,29 @@
                 if (atualizados.length) setDados(atualizados);
               },
               error: () => {
-                console.warn("Usando dados locais de fallback.");
+                console.warn("Usando dados locais.");
               }
             });
           }
         }
       }, []);
 
-      // Função centralizada para calcular o valor com base nos filtros de plantão selecionados
-      const calcularValorFiltrado = React.useCallback((item) => {
-        let escPar = true;
-        let escImpar = true;
-        if (filtroEscala === "PAR") escImpar = false;
-        if (filtroEscala === "IMPAR") escPar = false;
+      const supervisoes = useMemo(() => ["TODOS", ...Array.from(new Set(dados.map(d => d.supervisao).filter(Boolean))).sort()], [dados]);
+      const tipos = useMemo(() => ["TODOS", ...Array.from(new Set(dados.map(d => d.tipo).filter(Boolean))).sort()], [dados]);
+      const totalGeral = useMemo(() => dados.reduce((s, d) => s + d.chamados, 0), [dados]);
+      const maxChamados = useMemo(() => dados.length ? Math.max(...dados.map(d => d.chamados)) : 0, [dados]);
 
-        let soma = 0;
-        if (filtroPeriodo === "TOTAL" || filtroPeriodo === "DIURNO") {
-          if (escPar) soma += item.diurnoPar;
-          if (escImpar) soma += item.diurnoImpar;
-        }
-        if (filtroPeriodo === "TOTAL" || filtroPeriodo === "NOTURNO") {
-          if (escPar) soma += item.noturnoPar;
-          if (escImpar) soma += item.noturnoImpar;
-        }
-        return soma;
-      }, [filtroPeriodo, filtroEscala]);
-
-      // Mapeamento dinâmico dos dados computados conforme os filtros selecionados
-      const dadosCalculados = useMemo(() => {
-        return dados.map(d => ({
-          ...d,
-          valorExibido: calcularValorFiltrado(d)
-        }));
-      }, [dados, calcularValorFiltrado]);
-
-      const totalGeralCalculado = useMemo(() => dadosCalculados.reduce((s, d) => s + d.valorExibido, 0), [dadosCalculados]);
-      const maxChamadosCalculado = useMemo(() => dadosCalculados.length ? Math.max(...dadosCalculados.map(d => d.valorExibido)) : 0, [dadosCalculados]);
-
-      // Filtragem por input de busca e ordenação
       const filtrados = useMemo(() => {
         const termo = busca.trim().toLowerCase();
-        let r = dadosCalculados.filter(d => {
-          return !termo || d.unidade.toLowerCase().includes(termo);
+        let r = dados.filter(d => {
+          const supOk = filtroSup === "TODOS" || d.supervisao === filtroSup;
+          const tipoOk = filtroTipo === "TODOS" || d.tipo === filtroTipo;
+          const buscaOk = !termo ||
+            d.unidade.toLowerCase().includes(termo) ||
+            String(d.chamados).includes(termo) ||
+            d.tipo.toLowerCase().includes(termo) ||
+            d.supervisao.toLowerCase().includes(termo);
+          return supOk && tipoOk && buscaOk;
         });
 
         const [campo, dir] = ordenar.split("_");
@@ -318,34 +349,28 @@
           if (campo === "unidade") {
             return dir === "desc" ? b.unidade.localeCompare(a.unidade, "pt-BR", { numeric: true }) : a.unidade.localeCompare(b.unidade, "pt-BR", { numeric: true });
           }
-          return dir === "desc" ? b.valorExibido - a.valorExibido : a.valorExibido - b.valorExibido;
+          return dir === "desc" ? b.chamados - a.chamados : a.chamados - b.chamados;
         });
         return r;
-      }, [dadosCalculados, busca, ordenar]);
+      }, [dados, filtroSup, filtroTipo, busca, ordenar]);
 
-      const totalFiltradoPesquisa = useMemo(() => filtrados.reduce((s, d) => s + d.valorExibido, 0), [filtrados]);
-
-      // Distribuição dos Períodos para o Gráfico Lateral Informativo
-      const resumoPeriodos = useMemo(() => {
-        let dPar = 0, dImp = 0, nPar = 0, nImp = 0;
-        dados.forEach(d => {
-          dPar += d.diurnoPar; dImp += d.diurnoImpar;
-          nPar += d.noturnoPar; nImp += d.noturnoImpar;
-        });
-        return {
-          "DIURNO PAR": dPar,
-          "DIURNO ÍMPAR": dImp,
-          "NOTURNO PAR": nPar,
-          "NOTURNO ÍMPAR": nImp,
-          "DIURNO (TOTAL)": dPar + dImp,
-          "NOTURNO (TOTAL)": nPar + nImp
-        };
+      const totalFiltrado = useMemo(() => filtrados.reduce((s, d) => s + d.chamados, 0), [filtrados]);
+      const porSup = useMemo(() => {
+        const map = {};
+        dados.forEach(d => { map[d.supervisao] = (map[d.supervisao] || 0) + d.chamados; });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
       }, [dados]);
+      const porTipo = useMemo(() => {
+        const map = {};
+        dados.forEach(d => { map[d.tipo] = (map[d.tipo] || 0) + d.chamados; });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+      }, [dados]);
+      const maxSup = useMemo(() => porSup.length ? Math.max(...porSup.map(([, v]) => v)) : 0, [porSup]);
 
       if (carregando) {
         return (
           <div style={{ display: "grid", placeItems: "center", minHeight: "100vh", color: "var(--text)" }}>
-            <h3 style={{ margin: 0 }}>Carregando dados da nova planilha...</h3>
+            <h3 style={{ margin: 0 }}>Carregando dados...</h3>
           </div>
         );
       }
@@ -359,22 +384,22 @@
                   <span aria-hidden="true">🚑</span>
                   SAMU-192 INTERLOCUÇÃO LESTE
                 </h1>
-                <p className="subtitle">Indicadores por Plantões e Escalas</p>
+                <p className="subtitle">Indicadores de Atendimento 2026</p>
               </div>
               <div className="total-box-card">
-                <div className="total-box-label">TOTAL SELECIONADO</div>
-                <div className="total-box-value">{formatarNumero(totalGeralCalculado)}</div>
+                <div className="total-box-label">TOTAL GERAL</div>
+                <div className="total-box-value">{formatarNumero(totalGeral)}</div>
               </div>
             </div>
           </header>
 
           <section className="kpi-grid-container">
             {[
-              { label: "Unidades Ativas", val: dados.length, color: "var(--blue)" },
-              { label: "Total Diurno", val: formatarNumero(resumoPeriodos["DIURNO (TOTAL)"]), color: "var(--orange)" },
-              { label: "Total Noturno", val: formatarNumero(resumoPeriodos["NOTURNO (TOTAL)"]), color: "var(--purple)" },
-              { label: "Maior Vol. do Filtro", val: formatarNumero(maxChamadosCalculado), color: "var(--cyan)" },
-              { label: "Média p/ VTR (Filtro)", val: dados.length ? formatarNumero(Math.round(totalGeralCalculado / dados.length)) : 0, color: "var(--pink)" },
+              { label: "Unidades de Atendimento", val: dados.length, color: "var(--blue)" },
+              { label: "Supervisões", val: new Set(dados.map(d => d.supervisao)).size, color: "var(--purple)" },
+              { label: "Tipos de VTR", val: new Set(dados.map(d => d.tipo)).size, color: "var(--green)" },
+              { label: "Maior Vol.", val: formatarNumero(maxChamados), color: "var(--orange)" },
+              { label: "Média p/ Unid.", val: dados.length ? formatarNumero(Math.round(totalGeral / dados.length)) : 0, color: "var(--pink)" },
             ].map(k => (
               <div key={k.label} className="kpi-box-item" style={{ borderTop: `3px solid ${k.color}` }}>
                 <div className="kpi-box-value" style={{ color: k.color }}>{k.val}</div>
@@ -387,69 +412,67 @@
             <button className={`mobile-tab-btn ${activeTabMobile === 'lista' ? 'active' : ''}`} onClick={() => setActiveTabMobile('lista')}>
               Lista ({filtrados.length})
             </button>
-            <button className={`mobile-tab-btn ${activeTabMobile === 'analise' ? 'active' : ''}`} onClick={() => setActiveTabMobile('analise')}>
-              Distribuição Geral
+            <button className={`mobile-tab-btn ${activeTabMobile === 'supervisao' ? 'active' : ''}`} onClick={() => setActiveTabMobile('supervisao')}>
+              Regiões
+            </button>
+            <button className={`mobile-tab-btn ${activeTabMobile === 'tipo' ? 'active' : ''}`} onClick={() => setActiveTabMobile('tipo')}>
+              Tipos VTR
             </button>
           </div>
 
           <main className="dashboard-main-content">
             <aside className={`desktop-sidebar-container ${activeTabMobile !== 'lista' ? 'mobile-visible-aside' : ''}`}>
-              <section className={`content-card-panel sidebar-graph-card ${activeTabMobile === 'analise' ? 'force-show' : ''}`}>
-                <div className="content-card-title">Volume Real por Plantão</div>
-                <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-                  {[
-                    { label: "Diurno Par", val: resumoPeriodos["DIURNO PAR"], col: "var(--orange)" },
-                    { label: "Diurno Ímpar", val: resumoPeriodos["DIURNO ÍMPAR"], col: "var(--orange)" },
-                    { label: "Noturno Par", val: resumoPeriodos["NOTURNO PAR"], col: "var(--purple)" },
-                    { label: "Noturno Ímpar", val: resumoPeriodos["NOTURNO ÍMPAR"], col: "var(--purple)" },
-                  ].map(p => {
-                    const maxSoma = Math.max(resumoPeriodos["DIURNO PAR"], resumoPeriodos["DIURNO ÍMPAR"], resumoPeriodos["NOTURNO PAR"], resumoPeriodos["NOTURNO ÍMPAR"]);
-                    return (
-                      <div key={p.label}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, gap: 8 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{p.label}</span>
-                          <span style={{ fontSize: 12, fontWeight: 800, color: p.col }}>{formatarNumero(p.val)}</span>
-                        </div>
-                        <MiniBar value={p.val} max={maxSoma} color={p.col} />
+              <section className={`content-card-panel sidebar-graph-card ${activeTabMobile === 'supervisao' ? 'force-show' : ''}`}>
+                <div className="content-card-title">Por Supervisão</div>
+                <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+                  {porSup.map(([sup, val]) => (
+                    <div key={sup}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: SUP_COLORS[sup] || "#cbd5e1" }}>{sup}</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{formatarNumero(val)}</span>
                       </div>
-                    );
-                  })}
+                      <MiniBar value={val} max={maxSup} color={SUP_COLORS[sup] || "#94a3b8"} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className={`content-card-panel sidebar-graph-card ${activeTabMobile === 'tipo' ? 'force-show' : ''}`}>
+                <div className="content-card-title">Por Tipo</div>
+                <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {porTipo.map(([tipo, val]) => (
+                    <div key={tipo} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                      <Badge tipo={tipo} />
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{formatarNumero(val)}</span>
+                    </div>
+                  ))}
                 </div>
               </section>
             </aside>
 
             <section className={`main-data-table-panel ${activeTabMobile !== 'lista' ? 'mobile-hidden' : ''}`}>
               <div className="filter-grid-layout">
-                <input className="native-input-field" placeholder="Buscar unidade de atendimento..." value={busca} onChange={e => setBusca(e.target.value)} />
-                
-                {/* Filtro do Período */}
-                <select className="native-select-field" style={{ borderColor: "var(--orange)" }} value={filtroPeriodo} onChange={e => setFiltroPeriodo(e.target.value)}>
-                  <option value="TOTAL">Diurno + Noturno</option>
-                  <option value="DIURNO">Apenas Diurno</option>
-                  <option value="NOTURNO">Apenas Noturno</option>
+                <input className="native-input-field" placeholder="Buscar viatura, tipo, região..." value={busca} onChange={e => setBusca(e.target.value)} />
+                <select className="native-select-field" value={filtroSup} onChange={e => setFiltroSup(e.target.value)}>
+                  {supervisoes.map(s => <option key={s}>{s === 'TODOS' ? 'Todas Regiões' : s}</option>)}
                 </select>
-
-                {/* Filtro da Escala */}
-                <select className="native-select-field" style={{ borderColor: "var(--purple)" }} value={filtroEscala} onChange={e => setFiltroEscala(e.target.value)}>
-                  <option value="TODOS">Par + Ímpar</option>
-                  <option value="PAR">Apenas Dias Pares</option>
-                  <option value="IMPAR">Apenas Dias Ímpares</option>
+                <select className="native-select-field" value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
+                  {tipos.map(t => <option key={t}>{t === 'TODOS' ? 'Todos Tipos' : t}</option>)}
                 </select>
-
                 <select className="native-select-field" value={ordenar} onChange={e => setOrdenar(e.target.value)}>
                   <option value="chamados_desc">Mais chamados</option>
                   <option value="chamados_asc">Menos chamados</option>
-                  <option value="unidade_asc">Unidade (A-Z)</option>
-                  <option value="unidade_desc">Unidade (Z-A)</option>
+                  <option value="unidade_asc">Viatura (A-Z)</option>
+                  <option value="unidade_desc">Viatura (Z-A)</option>
                 </select>
               </div>
 
               <div className="content-card-panel">
                 <div className="summary-info-line">
                   <span>
-                    Exibindo <strong style={{ color: "var(--text)" }}>{filtrados.length}</strong> unidades de atendimento 
+                    <strong style={{ color: "var(--text)" }}>{filtrados.length}</strong> Unidades encontradas
                     <span style={{ color: "var(--muted-2)" }}> · </span>
-                    Total no filtro: <strong style={{ color: "var(--cyan)" }}>{formatarNumero(totalFiltradoPesquisa)}</strong> chamados
+                    <strong style={{ color: "var(--blue)" }}>{formatarNumero(totalFiltrado)}</strong> chamados
                   </span>
                 </div>
 
@@ -457,19 +480,19 @@
                   <table className="desktop-native-table">
                     <thead>
                       <tr>
-                        <th style={{ width: '55%', background: "rgba(15, 27, 45, .92)", padding: "12px 14px", fontWeight: 800, color: "#aebdd0", fontSize: 11, letterSpacing: .7, textTransform: "uppercase", borderBottom: "1px solid var(--border)", textAlign: "left" }}>Unidade de Atendimento</th>
-                        <th style={{ width: '45%', background: "rgba(15, 27, 45, .92)", padding: "12px 14px", fontWeight: 800, color: "#aebdd0", fontSize: 11, letterSpacing: .7, textTransform: "uppercase", borderBottom: "1px solid var(--border)", textAlign: "left" }}>Chamados no Filtro Atual</th>
+                        <th style={{ width: '40%', background: "rgba(15, 27, 45, .92)", padding: "12px 14px", fontWeight: 800, color: "#aebdd0", fontSize: 11, letterSpacing: .7, textTransform: "uppercase", borderBottom: "1px solid var(--border)", textAlign: "left" }}>Unidades de Atendimento</th>
+                        <th style={{ width: '15%', background: "rgba(15, 27, 45, .92)", padding: "12px 14px", fontWeight: 800, color: "#aebdd0", fontSize: 11, letterSpacing: .7, textTransform: "uppercase", borderBottom: "1px solid var(--border)", textAlign: "left" }}>Tipo</th>
+                        <th style={{ width: '20%', background: "rgba(15, 27, 45, .92)", padding: "12px 14px", fontWeight: 800, color: "#aebdd0", fontSize: 11, letterSpacing: .7, textTransform: "uppercase", borderBottom: "1px solid var(--border)", textAlign: "left" }}>Supervisão</th>
+                        <th style={{ width: '25%', background: "rgba(15, 27, 45, .92)", padding: "12px 14px", fontWeight: 800, color: "#aebdd0", fontSize: 11, letterSpacing: .7, textTransform: "uppercase", borderBottom: "1px solid var(--border)", textAlign: "left" }}>Chamados</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filtrados.map((d, i) => (
                         <tr key={d.id} style={i % 2 === 1 ? { background: "rgba(255, 255, 255, .025)" } : undefined}>
-                          <td style={{ padding: "14px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", fontWeight: 850, color: "#dbeafe", verticalAlign: "middle" }}>
-                            {d.unidade}
-                          </td>
-                          <td style={{ padding: "14px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", verticalAlign: "middle" }}>
-                            <ChamadosCell value={d.valorExibido} max={maxChamadosCalculado} />
-                          </td>
+                          <td style={{ padding: "12px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", fontWeight: 850, color: "#dbeafe", verticalAlign: "middle" }}>{d.unidade}</td>
+                          <td style={{ padding: "12px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", verticalAlign: "middle" }}><Badge tipo={d.tipo} /></td>
+                          <td style={{ padding: "12px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", verticalAlign: "middle" }}><SupervisaoDot sup={d.supervisao} /></td>
+                          <td style={{ padding: "12px 14px", borderBottom: "1px solid rgba(148, 163, 184, .10)", verticalAlign: "middle" }}><ChamadosCell value={d.chamados} max={maxChamados} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -478,10 +501,10 @@
 
                 <div className="mobile-card-list-view">
                   {filtrados.map((d) => (
-                    <UnidadeMobileCard key={d.id} item={d} valorExibido={d.valorExibido} maxChamados={maxChamadosCalculado} />
+                    <UnidadeMobileCard key={d.id} item={d} maxChamados={maxChamados} />
                   ))}
                   {filtrados.length === 0 && (
-                    <div className="mobile-empty-state" style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}>Nenhum resultado encontrado.</div>
+                    <div className="mobile-empty-state">Nenhum resultado encontrado.</div>
                   )}
                 </div>
               </div>
@@ -505,26 +528,28 @@
               gap: 10px; 
               font-size: 22px; 
               font-weight: 850; 
+              letter-spacing: normal;
               margin: 0; 
               white-space: nowrap; 
+              overflow: visible; 
             }
             .subtitle { font-size: 13px; color: #9ec9ff; margin: 6px 0 0; }
             .total-box-card {
-              background: rgba(61, 213, 243, 0.1); border: 1px solid rgba(61, 213, 243, 0.25);
-              border-radius: var(--radius); padding: 10px 16px; text-align: right; min-width: 160px;
+              background: rgba(77, 163, 255, .10); border: 1px solid rgba(77, 163, 255, .24);
+              border-radius: var(--radius); padding: 10px 16px; text-align: right; min-width: 150px;
             }
-            .total-box-label { font-size: 10px; color: #3dd5f3; font-weight: 800; letter-spacing: .8px; }
-            .total-box-value { font-size: 25px; font-weight: 850; color: #eef4ff; }
+            .total-box-label { font-size: 10px; color: #9ec9ff; font-weight: 800; letter-spacing: .8px; }
+            .total-box-value { font-size: 25px; font-weight: 850; }
 
             .kpi-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding: 20px 28px; }
             .kpi-box-item {
               background: linear-gradient(180deg, rgba(20, 34, 57, .96), rgba(17, 29, 48, .96));
               border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
             }
-            .kpi-box-value { font-size: 26px; font-weight: 850; line-height: 1; }
+            .kpi-box-value { font-size: 28px; font-weight: 850; line-height: 1; }
             .kpi-box-label { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 600; }
 
-            .dashboard-main-content { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; padding: 0 28px; }
+            .dashboard-main-content { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; padding: 0 28px; }
             .desktop-sidebar-container { display: flex; flex-direction: column; gap: 16px; }
             
             .content-card-panel {
@@ -539,7 +564,7 @@
             .filter-grid-layout {
               background: rgba(17, 29, 48, .92); border: 1px solid var(--border); border-radius: var(--radius);
               box-shadow: var(--shadow); padding: 14px; margin-bottom: 14px; display: grid;
-              grid-template-columns: minmax(200px, 1fr) 180px 180px 180px; gap: 10px; align-items: center;
+              grid-template-columns: minmax(220px, 1fr) 160px 160px 180px; gap: 10px; align-items: center;
             }
             .native-input-field {
               width: 100%; border: 1px solid var(--border-strong); border-radius: 7px; padding: 9px 12px;
@@ -556,10 +581,6 @@
 
             .mobile-tabs-container { display: none; }
             .mobile-card-list-view { display: none; }
-
-            @media (max-width: 980px) {
-              .filter-grid-layout { grid-template-columns: repeat(2, 1fr) !important; }
-            }
 
             @media (max-width: 860px) {
               .dashboard-header { padding: 16px 14px 14px !important; }
@@ -578,7 +599,7 @@
               .kpi-box-value { font-size: 24px !important; }
 
               .mobile-tabs-container {
-                display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 0 14px; margin-bottom: 14px;
+                display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 14px; margin-bottom: 14px;
               }
               .mobile-tab-btn {
                 background: rgba(17, 29, 48, 0.6); border: 1px solid var(--border); color: var(--muted);
